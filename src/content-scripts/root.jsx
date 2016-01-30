@@ -16,7 +16,8 @@ export default class Root extends React.Component {
 		super(props)
 		this.state = {
 			currentTime: null,
-			totalTime: null
+			totalTime: null,
+			annotations: []
 		}
 	}
 
@@ -52,6 +53,21 @@ export default class Root extends React.Component {
 				totalTime: e.detail.total
 			});
 		});
+
+		this.updateCurrentAnnotations();
+	}
+
+	updateCurrentAnnotations() {
+		// init from storage sync
+		var self = this;
+		chrome.storage.sync.get('youtubeAnnotations', function(obj) {
+			// for this current URL, an array of objects
+			let releventAnnotations = obj['youtubeAnnotations'][window.location.href];
+			if (releventAnnotations !== undefined) {
+				// add all to state (it's an array)
+				self.setState({annotations: releventAnnotations});
+			}
+		})
 	}
 
 	save(annotation) {
@@ -74,6 +90,7 @@ export default class Root extends React.Component {
 			obj[url] = UrlAnnotations;
 
 			chrome.storage.sync.set({'youtubeAnnotations': obj}, function() {
+				self.updateCurrentAnnotations();
 				chrome.storage.sync.get('youtubeAnnotations', function(obj) {
 					console.dir(obj);
 				})
@@ -85,7 +102,7 @@ export default class Root extends React.Component {
 		return (
 			<div style={styles.outer}>
 				<Annotater save={this.save.bind(this)} />
-				<Playbar currentTime={this.state.currentTime} totalTime={this.state.totalTime} />
+				<Playbar currentTime={this.state.currentTime} totalTime={this.state.totalTime} annotations={this.state.annotations} />
 			</div>
 		)
 	}
