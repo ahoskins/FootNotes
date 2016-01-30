@@ -1,0 +1,42 @@
+{
+  "manifest_version": 2,
+
+  "name": "Youtube-rtc",
+  "version": "1.0",
+
+  "background": {
+    "scripts": ["src/background/background.js"],
+    "persistent": false
+  },
+
+  "commands": {
+    "activate": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Period"
+      },
+      "description": "activate it!"
+    }
+  },
+
+  "permissions": [
+    "tabs",
+    "https://ajax.googleapis.com/",
+    "storage",
+    "app",
+    "windows",
+    "background",
+    "identity",
+    "identity.email",
+    "activeTab",
+    "*://*/*"
+  ],
+
+  "oauth2": {
+    "client_id": "183543876339-cei1o9ca1q3l6iiv9tovdm5b7jaoapsa.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.google.com/m8/feeds/"
+    ]
+  },
+
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+}
