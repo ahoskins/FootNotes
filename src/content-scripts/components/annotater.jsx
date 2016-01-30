@@ -1,24 +1,20 @@
-import React from 'react'
+import React from 'react';
 
-export default class Annotate extends React.Component {
+export default class Annotater extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state  = {inputValue: ''};
+		this.state = {inputValue: ''};
 	}
 
 	updateState(e) {
 		this.setState({inputValue: e.target.value});
 	}
 
-	save() {
-		this.props.save(this.state.inputValue);
-	}
-
 	render() {
 		return (
 			<div>
-				<input onClick={this.updateState} />
-				<button onClick={this.save}>Annotater</button>
+				<input onChange={this.updateState.bind(this)} />
+				<button onClick={this.props.save.bind(this, this.state.inputValue)}>Annotater</button>
 			</div>
 		)
 	}

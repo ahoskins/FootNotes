@@ -47,9 +47,6 @@ export default class Root extends React.Component {
 		// listen for this event and update state
 		var self = this;
 		document.addEventListener('youtube', function(e) {
-			console.log('event happened');
-			console.dir(e.detail.current);
-			console.dir(e.detail.total);
 			self.setState({
 				currentTime: e.detail.current,
 				totalTime: e.detail.total
@@ -58,31 +55,36 @@ export default class Root extends React.Component {
 	}
 
 	save(annotation) {
+		console.log('saving');
 		const self = this;
-		// save annotation along with el.getCurrentTime() in localstorage
+		// chrome.storage.sync.clear();
+
+		// save annotation along with currentTime in localstorage
 		chrome.storage.sync.get('youtubeAnnotations', function(obj) {
-			// //
-			// if (Object.keys(obj).length === 0) obj['chrome-notes-annotations'] = {};
-			// empty object {} if doesn't exist yet
+			if (Object.keys(obj).length === 0) obj['youtubeAnnotations'] = {};
+			obj = obj['youtubeAnnotations'];
 
 			const url = window.location.href;
-
 			const UrlAnnotations = obj[url] || [];
-			UrlAnnotations.append({
+			UrlAnnotations.push({
 				'annotation': annotation,
-				'time': self.currentTime
+				'time': self.state.currentTime
 			});
 
 			obj[url] = UrlAnnotations;
 
-			chrome.storage.sync.set({'youtubeAnnotations': obj});
+			chrome.storage.sync.set({'youtubeAnnotations': obj}, function() {
+				chrome.storage.sync.get('youtubeAnnotations', function(obj) {
+					console.dir(obj);
+				})
+			});
 		});
 	}
 
 	render() {
 		return (
 			<div style={styles.outer}>
-				<Annotater save={this.save} />
+				<Annotater save={this.save.bind(this)} />
 				<Playbar currentTime={this.state.currentTime} totalTime={this.state.totalTime} />
 			</div>
 		)
