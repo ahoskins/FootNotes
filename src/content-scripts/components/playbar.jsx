@@ -15,15 +15,15 @@ const styles = {
     height: '5px'
   },
   tick: {
-    backgroundColor: 'blue',
-    height: '20px',
-    width: '10px',
+    backgroundColor: '#f3b61f',
+    height: '22px',
+    width: '5px',
     position: 'relative',
-    bottom: '12px',
+    bottom: '16px',
     display: 'inline-block'
   },
   tooltip: {
-    backgroundColor: 'red',
+    backgroundColor: '#bbd8b3',
     height: '20px',
     width: '10%',
     position: 'absolute',

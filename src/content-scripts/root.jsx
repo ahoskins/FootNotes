@@ -6,7 +6,8 @@ const styles = {
 	outer: {
 		height: '80px',
 		width: '100%',
-		backgroundColor: '#d3d3d3',
+		backgroundColor: '#fefefe',
+		border: '1px solid #222222',
 		padding: '3px'
 	}
 };
