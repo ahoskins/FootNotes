@@ -4,6 +4,7 @@ import Playbar from './components/playbar.jsx';
 import Share from './components/share.jsx';
 import SignIn from './components/signin.jsx';
 import SignOut from './components/signout.jsx';
+import io from 'socket.io-client';
 import {deleteAnnotationById, shareAnnotation, getMatchingAnnotations} from './network.js';
 
 const styles = {
@@ -16,10 +17,8 @@ const styles = {
 	}
 };
 
-/*
-- set username page with title
-- main page (add title) - left: make annotation, right: share annotations, right signed in as <andrew>
-*/
+// make it global so the events don't go out of lexical scope
+let socket = null;
 
 export default class Root extends React.Component {
 	constructor(props) {
@@ -36,6 +35,7 @@ export default class Root extends React.Component {
 	Inject interval code into youtube.com, listen for currentTime and totalTime
 	*/
 	componentDidMount() {
+
 		// will be stringified
 		const injectedCode = '(' + function() {
 
@@ -79,7 +79,6 @@ export default class Root extends React.Component {
 
 	/*
 	Set component state based on annotations at current url
-	(TODO, call this when playing video changes)
 	*/
 	mirrorStorageToState() {
 		let self = this;
@@ -197,6 +196,24 @@ export default class Root extends React.Component {
 				deleteAnnotationById(annotation._id);
 			}
 		})
+
+		// SOCKET IO
+
+		socket = io.connect("https://youtube-annotate-backend.herokuapp.com/");
+		socket.on('message', function(mes) {
+			console.log(mes);
+			socket.emit('my_name', username);
+		});
+
+		socket.on('refresh_yo', function(mes) {
+			console.log('refresh-yo');
+			getMatchingAnnotations(username).then(function(response) {
+				for (let annotation of response) {
+					self.saveAnnotationFromServer(annotation);
+					deleteAnnotationById(annotation._id);
+				}
+			})
+		});
 	}
 
 	signOut() {
