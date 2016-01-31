@@ -17,10 +17,16 @@ const styles = {
   tick: {
     backgroundColor: 'blue',
     height: '20px',
-    width: '3px',
+    width: '10px',
     position: 'relative',
     bottom: '12px',
     display: 'inline-block'
+  },
+  tooltip: {
+    backgroundColor: 'red',
+    height: '20px',
+    width: '10%',
+    position: 'absolute',
   }
 }
 
@@ -49,6 +55,38 @@ let m = function() {
 export default class Playbar extends React.Component {
   constructor(props) {
     super(props);
+    // the time of the hovered will be here when its hovered
+    this.state = {
+      hovered: {}
+    }
+    // each annotation gets a
+  }
+
+  setTrue(time) {
+    this.state.hovered[time] = true;
+    this.setState({hovered: this.state.hovered});
+  }
+
+  setFalse(time) {
+    this.state.hovered[time] = false;
+    this.setState({hovered: this.state.hovered});
+  }
+
+  componentWillMount() {
+    // setup hover booleans for ticks
+    let self = this;
+    this.props.annotations.forEach(function(annotation) {
+      self.state.hovered[annotation.time] = false;
+    })
+    this.setState({hovered: this.state.hovered});
+  }
+
+  componentWillReceiveProps(newProps) {
+    // let self = this;
+    // newProps.annotations.forEach(function(annotation) {
+    //   self.state.hovered[annotation.time] = false;
+    // })
+    // this.setState({hovered: this.state.hovered});
   }
 
   render() {
@@ -59,11 +97,28 @@ export default class Playbar extends React.Component {
     let ticks = this.props.annotations.map(function(annotation) {
       let portion = (annotation.time / self.props.totalTime) * 100;
 
+      // if not set then display none
+      let d = {display: 'none'};
+      if (self.state.hovered[annotation.time] === true) {
+        d.display = 'inline-block';
+      }
+
       return (
-        <div style={m(styles.tick, {left: portion + '%'})}>
-        </div>
+        <span>
+          <div
+            style={m(styles.tick, {left: portion + '%'})}
+            onMouseOver={self.setTrue.bind(self, annotation.time)}
+            onMouseOut={self.setFalse.bind(self, annotation.time)}></div>
+          <div style={m(styles.tooltip, {left: (portion - 5) + '%'}, d)}>
+              contents here
+          </div>
+        </span>
       )
     })
+
+
+    // hover tick and see tooltip with annotation
+    // click tick and jump to that part of the video
 
     return (
       <div style={styles.outer}>
