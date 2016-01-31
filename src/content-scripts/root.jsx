@@ -2,6 +2,7 @@ import React from 'react';
 import Annotater from './components/annotater.jsx';
 import Playbar from './components/playbar.jsx';
 import Share from './components/share.jsx';
+import {deleteAnnotationById, shareAnnotation, getMatchingAnnotations} from './network.js';
 
 const styles = {
 	outer: {
@@ -27,7 +28,9 @@ export default class Root extends React.Component {
 		}
 	}
 
-	// inject code into webpage and get stream of events back updating currentTime
+	/*
+	Inject interval code into youtube.com, listen for currentTime and totalTime
+	*/
 	componentDidMount() {
 		// will be stringified
 		const injectedCode = '(' + function() {
@@ -61,6 +64,10 @@ export default class Root extends React.Component {
 		});
 	}
 
+	/*
+	Set component state based on annotations at current url
+	(TODO, call this when playing video changes)
+	*/
 	mirrorStorageToState() {
 		let self = this;
 		chrome.storage.sync.get('youtubeAnnotations', function(obj) {
@@ -74,29 +81,17 @@ export default class Root extends React.Component {
 		});
 	}
 
-	// ADD ANNOTATION TO LOCALSTORAGE THEN DELETE FROM SERVER
-	// if already contain that exact timestamp that means it was send twice, so don't add again!
-	insertAndDeleteAnnotationFromServer(annotation) {
+	/*
+	save an annotation from server into localstorage
+	if it already exists (already has been shared) don't add again
+	*/
+	saveAnnotationFromServer(annotation) {
 		console.dir(annotation);
-		// INSERT
-		//
+
 		var self = this;
 		chrome.storage.sync.get('youtubeAnnotations', function(obj) {
 			if (Object.keys(obj).length === 0) obj['youtubeAnnotations'] = {};
 			obj = obj['youtubeAnnotations'];
-
-			const UrlAnnotations = obj[annotation.url] || [];
-
-			// DELETE (keep the server clean)
-			//
-			var xhr = new XMLHttpRequest();
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState === 4 && xhr.status === 200) {
-					console.log(xhr.responseText);
-				}
-			}
-			xhr.open("DELETE", "https://youtube-annotate-backend.herokuapp.com/api/remove/" + annotation._id, true);
-			xhr.send(null);
 
 			// check if already contains annotation
 			for (let existing of self.state.annotations) {
@@ -106,6 +101,7 @@ export default class Root extends React.Component {
 			}
 
 			// annotation doesn't exist yet, add it to localstorage
+			const UrlAnnotations = obj[annotation.url] || [];
 			UrlAnnotations.push({
 				'content': annotation.content,
 				'time': annotation.time
@@ -118,6 +114,9 @@ export default class Root extends React.Component {
 		})
 	}
 
+	/*
+	Saves a annotation from locally from (not from a friend)
+	*/
 	save(annotation) {
 		console.log('saving');
 		const self = this;
@@ -130,39 +129,31 @@ export default class Root extends React.Component {
 
 			const url = window.location.href;
 			const UrlAnnotations = obj[url] || [];
-
 			UrlAnnotations.push({
 				'content': annotation,
 				'time': self.state.currentTime
 			});
 			obj[url] = UrlAnnotations;
+
 			chrome.storage.sync.set({'youtubeAnnotations': obj}, function() {
 				self.mirrorStorageToState();
 			});
 		});
 	}
 
-	// SHARE EACH STATE ANNOTATION (ANNOTATION AND TIME) TO THE TEXT-INPUT GIVEN USER
+	/*
+	share each annotation on the current URL with the chosen user
+	*/
 	share(username) {
-		// for each in localstorage, do a create
 		for (let annotation of this.state.annotations) {
-			// {time: Number, content: String}
-			// need: {}
-			let xhr = new XMLHttpRequest();
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState === 4 && xhr.status === 200) {
-					console.log(xhr.responseText);
-				}
-			}
-			xhr.open("POST", "https://youtube-annotate-backend.herokuapp.com/api/create/", true);
-			xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-			xhr.send('time=' + annotation.time + '&target=' + username + '&url=' + window.location.href + '&content=' + annotation.content);
+			shareAnnotation(annotation, username);
 		}
 	}
 
+	/*
+	respond to onclick the ticks in playbar
+	*/
 	seekTo(time) {
-		console.log('seeking');
-		console.log(time);
 		// inject some code
 		const injectedCode = '(' + function(time) {
 			document.getElementById('movie_player').seekTo(JSON.stringify(time), true);
@@ -174,23 +165,23 @@ export default class Root extends React.Component {
 		script.parentNode.removeChild(script);
 	}
 
+	/*
+	when they "login" get the fresh annotations for this user
+	*/
 	user(username) {
 		this.setState({userName: username});
 
+		// might already have some in localstorage and none on the network
+		// (this gets called again if there are new annotations on the network)
 		this.mirrorStorageToState();
 
-		// GET NEW FROM SERVER THEN DELETE & SET STATE BASED ON CURRENT CONTENTS OF LOCALSTORAGE
 		var self = this;
-		var xhr = new XMLHttpRequest();
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState === 4 && xhr.status === 200) {
-				for (let annotation of JSON.parse(xhr.responseText)) {
-					self.insertAndDeleteAnnotationFromServer(annotation);
-				}
+		getMatchingAnnotations(username).then(function(response) {
+			for (let annotation of response) {
+				self.saveAnnotationFromServer(annotation);
+				deleteAnnotationById(annotation._id);
 			}
-		}
-		xhr.open("GET", "https://youtube-annotate-backend.herokuapp.com/api/match/" + username, true);
-		xhr.send(null);
+		})
 	}
 
 	/*
