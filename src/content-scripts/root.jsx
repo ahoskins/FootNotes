@@ -2,6 +2,8 @@ import React from 'react';
 import Annotater from './components/annotater.jsx';
 import Playbar from './components/playbar.jsx';
 import Share from './components/share.jsx';
+import SignIn from './components/signin.jsx';
+import SignOut from './components/signout.jsx';
 import {deleteAnnotationById, shareAnnotation, getMatchingAnnotations} from './network.js';
 
 const styles = {
@@ -11,11 +13,13 @@ const styles = {
 		backgroundColor: '#fefefe',
 		border: '1px solid #222222',
 		padding: '3px'
-	},
-	right: {
-		float: 'right'
 	}
 };
+
+/*
+- set username page with title
+- main page (add title) - left: make annotation, right: share annotations, right signed in as <andrew>
+*/
 
 export default class Root extends React.Component {
 	constructor(props) {
@@ -178,7 +182,7 @@ export default class Root extends React.Component {
 	/*
 	when they "login" get the fresh annotations for this user
 	*/
-	user(username) {
+	signIn(username) {
 		console.log('user');
 		this.setState({userName: username});
 
@@ -195,17 +199,34 @@ export default class Root extends React.Component {
 		})
 	}
 
+	signOut() {
+		this.setState({userName: ''});
+	}
+
 	render() {
+		var self = this;
 		return (
 			<div style={styles.outer}>
-				<Annotater save={this.save.bind(this)} />
-				<Share style={styles.right} share={this.share.bind(this)} user={this.user.bind(this)} />
-				{this.state.userName};
-				<Playbar
-					currentTime={this.state.currentTime}
-					totalTime={this.state.totalTime}
-					annotations={this.state.annotations}
-					seekTo={this.seekTo} />
+				{(function() {
+					if (self.state.userName === '') {
+						return (
+							<SignIn signIn={self.signIn.bind(self)} />
+						)
+					} else {
+						return (
+							<div>
+								<Annotater save={self.save.bind(self)} />
+								<SignOut signout={self.signOut.bind(self)} user={self.state.userName} />
+								<Share share={self.share.bind(self)} />
+								<Playbar
+									currentTime={self.state.currentTime}
+									totalTime={self.state.totalTime}
+									annotations={self.state.annotations}
+									seekTo={self.seekTo} />
+							</div>
+						)
+					}
+				}())}
 			</div>
 		)
 	}

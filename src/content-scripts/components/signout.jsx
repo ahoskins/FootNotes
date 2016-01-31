@@ -14,11 +14,11 @@ const styles = {
 	},
   right: {
     float: 'right',
-    marginRight: '50px'
+    marginRight: '20px'
   }
 }
 
-export default class Share extends React.Component {
+export default class SignOut extends React.Component {
   constructor(props) {
 		super(props);
 		this.state = {
@@ -33,8 +33,7 @@ export default class Share extends React.Component {
 	render() {
 		return (
 			<span style={styles.right}>
-				<button style={styles.button} onClick={this.props.share.bind(this, this.state.inputValue)}>Share With: </button>
-        <input style={styles.input} onChange={this.updateState.bind(this)} />
+        <button style={styles.button} onClick={this.props.signout.bind(this, this.state.inputValue)}>Sign out <b>{this.props.user}</b></button>
 			</span>
 		)
 	}

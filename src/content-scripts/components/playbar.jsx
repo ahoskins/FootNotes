@@ -22,11 +22,15 @@ const styles = {
     display: 'inline-block'
   },
   tooltip: {
-    backgroundColor: '#bbd8b3',
-    height: '20px',
-    width: '10%',
+    backgroundColor: '#607D8B',
+    height: '25px',
+    width: '12%',
     position: 'absolute',
-    marginTop: '10px'
+    marginTop: '15px',
+    borderRadius: '5px',
+    color: 'white',
+    lineHeight: '30px',
+    padding: '3px'
   }
 }
 
