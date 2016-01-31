@@ -88,6 +88,11 @@ export default class Playbar extends React.Component {
     // this.initAllToolTipsNotActive();
   }
 
+  seekTo(time) {
+    console.log(time);
+    this.props.seekTo(time);
+  }
+
   render() {
     const playedPercent = (this.props.currentTime / this.props.totalTime) * 100
     const restPercent = 100 - playedPercent;
@@ -107,7 +112,9 @@ export default class Playbar extends React.Component {
           <div
             style={m(styles.tick, {left: portion + '%'})}
             onMouseOver={self.setTrue.bind(self, annotation.time)}
-            onMouseOut={self.setFalse.bind(self, annotation.time)}></div>
+            onMouseOut={self.setFalse.bind(self, annotation.time)}
+            onClick={self.seekTo.bind(self, annotation.time)}>
+          </div>
           <div style={m(styles.tooltip, {left: (portion - 5) + '%'}, d)}>
               contents here
           </div>

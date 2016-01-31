@@ -70,6 +70,20 @@ export default class Root extends React.Component {
 		})
 	}
 
+	seekTo(time) {
+		console.log('seeking');
+		console.log(time);
+		// inject some code
+		const injectedCode = '(' + function(time) {
+			document.getElementById('movie_player').seekTo(JSON.stringify(time), true);
+		} + ')(' + JSON.stringify(time) + ');';
+
+		const script = document.createElement('script');
+		script.textContent = injectedCode;
+		(document.head || document.documentElement).appendChild(script);
+		script.parentNode.removeChild(script);
+	}
+
 	save(annotation) {
 		console.log('saving');
 		const self = this;
@@ -102,7 +116,11 @@ export default class Root extends React.Component {
 		return (
 			<div style={styles.outer}>
 				<Annotater save={this.save.bind(this)} />
-				<Playbar currentTime={this.state.currentTime} totalTime={this.state.totalTime} annotations={this.state.annotations} />
+				<Playbar
+					currentTime={this.state.currentTime}
+					totalTime={this.state.totalTime}
+					annotations={this.state.annotations}
+					seekTo={this.seekTo} />
 			</div>
 		)
 	}
