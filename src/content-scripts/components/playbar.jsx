@@ -27,6 +27,7 @@ const styles = {
     height: '20px',
     width: '10%',
     position: 'absolute',
+    marginTop: '10px'
   }
 }
 
@@ -55,11 +56,10 @@ let m = function() {
 export default class Playbar extends React.Component {
   constructor(props) {
     super(props);
-    // the time of the hovered will be here when its hovered
+    // each annotation time gets a boolean saying if its currently hovered
     this.state = {
       hovered: {}
     }
-    // each annotation gets a
   }
 
   setTrue(time) {
@@ -73,7 +73,10 @@ export default class Playbar extends React.Component {
   }
 
   componentWillMount() {
-    // setup hover booleans for ticks
+    this.initAllToolTipsNotActive()
+  }
+
+  initAllToolTipsNotActive() {
     let self = this;
     this.props.annotations.forEach(function(annotation) {
       self.state.hovered[annotation.time] = false;
@@ -82,11 +85,7 @@ export default class Playbar extends React.Component {
   }
 
   componentWillReceiveProps(newProps) {
-    // let self = this;
-    // newProps.annotations.forEach(function(annotation) {
-    //   self.state.hovered[annotation.time] = false;
-    // })
-    // this.setState({hovered: this.state.hovered});
+    // this.initAllToolTipsNotActive();
   }
 
   render() {
