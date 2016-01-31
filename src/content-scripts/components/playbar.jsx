@@ -18,8 +18,7 @@ const styles = {
     backgroundColor: '#f3b61f',
     height: '22px',
     width: '5px',
-    position: 'relative',
-    bottom: '16px',
+    position: 'absolute',
     display: 'inline-block'
   },
   tooltip: {

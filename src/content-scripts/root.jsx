@@ -118,7 +118,6 @@ export default class Root extends React.Component {
 	Saves a annotation from locally from (not from a friend)
 	*/
 	save(annotation) {
-		console.log('saving');
 		const self = this;
 		// chrome.storage.sync.clear();
 
@@ -184,20 +183,6 @@ export default class Root extends React.Component {
 			}
 		})
 	}
-
-	/*
-	What do we want to happen?
-	- on mount, update new annotations from server and delete (done)
-		- since deleting, means can't have dups in localstorage (done)
-	- keep annotation state in sync with current URL annotations
-		- video can change without onmount happening, so need to update state every time this happens
-		- requirement: state reflects currently playing videos annotations
-		- updated when you SAVE and after getting from server (ONMOUNT) (done)
-		- and updated when NEW VIDEO STARTS (TODO)
-	- share button shares all annotations for current page with peer (done)
-	- if you press the share button again with same person thats a way to get dups (done)
-		- receiver checks if that exact timestamp is in localstorage yet then can't get dups (done)
-	*/
 
 	render() {
 		return (
