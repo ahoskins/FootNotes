@@ -44,15 +44,10 @@ let m = function() {
   return result;
 }
 
-// takes in as props: currentTime and totalTime and annoations object for this URL
-//
-// render a tick (for an existing annotation) at a certain portion of the total size
-// render a tick (for the currentTime), same rule
-//
-// get outerWidth and totalTime
-// currentTime/totalTime * outerWidth = location-of-current-time
-
-// two divs, both inline.  left div is as wide as the curent play time, right div fills the rest
+/*
+component that takes in currentTime, totalTime and annotations for current URL
+outputs the clone of the youtube player with annotion ticks and tooltip annotation content
+*/
 export default class Playbar extends React.Component {
   constructor(props) {
     super(props);
@@ -110,7 +105,7 @@ export default class Playbar extends React.Component {
       return (
         <span>
           <div
-            style={m(styles.tick, {left: portion + '%'})}
+            style={m(styles.tick, {left: (portion - 2) + '%'})}
             onMouseOver={self.setTrue.bind(self, annotation.time)}
             onMouseOut={self.setFalse.bind(self, annotation.time)}
             onClick={self.seekTo.bind(self, annotation.time)}>
@@ -121,10 +116,6 @@ export default class Playbar extends React.Component {
         </span>
       )
     })
-
-
-    // hover tick and see tooltip with annotation
-    // click tick and jump to that part of the video
 
     return (
       <div style={styles.outer}>
