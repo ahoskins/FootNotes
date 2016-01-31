@@ -62,6 +62,15 @@ export default class Root extends React.Component {
 				totalTime: e.detail.total
 			});
 		});
+
+		// when URL changes, reload all the shit
+		window.addEventListener('hashChange', function() {
+			let self = this;
+			// let the URL actually change first
+			setTimeout(function() {
+				this.mirrorStorageToState();
+			}, 100);
+		});
 	}
 
 	/*
@@ -77,6 +86,8 @@ export default class Root extends React.Component {
 			// mirror current annotations for url if they exist
 			if (obj[window.location.href] !== undefined) {
 				self.setState({annotations: obj[window.location.href]});
+			} else {
+				self.setState({annotations: []});
 			}
 		});
 	}
