@@ -103,7 +103,7 @@ export default class Playbar extends React.Component {
       }
 
       return (
-        <span>
+        <span key={annotation.time}>
           <div
             style={m(styles.tick, {left: portion + '%'})}
             onMouseOver={self.setTrue.bind(self, annotation.time)}
@@ -119,8 +119,8 @@ export default class Playbar extends React.Component {
 
     return (
       <div style={styles.outer}>
-        <div style={Object.assign(styles.played, {width: playedPercent + '%' })}></div>
-        <div style={Object.assign(styles.rest, {width: restPercent + '%' })}></div>
+        <div style={m(styles.played, {width: playedPercent + '%' })}></div>
+        <div style={m(styles.rest, {width: restPercent + '%' })}></div>
         {ticks}
       </div>
     )

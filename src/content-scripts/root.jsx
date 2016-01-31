@@ -169,6 +169,7 @@ export default class Root extends React.Component {
 	when they "login" get the fresh annotations for this user
 	*/
 	user(username) {
+		console.log('user');
 		this.setState({userName: username});
 
 		// might already have some in localstorage and none on the network

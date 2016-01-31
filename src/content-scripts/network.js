@@ -2,7 +2,9 @@
 first two are fire and forget, last returns a promise
 */
 
-// get id from database
+/*
+delete an annotation using its _id field
+*/
 function deleteAnnotationById(id) {
   var xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function() {
@@ -14,7 +16,9 @@ function deleteAnnotationById(id) {
   xhr.send(null);
 }
 
-// {time: Number, content: String} (apply for each localstorage array)
+/*
+create annotation on server for specified user
+*/
 function shareAnnotation(annotation, username) {
   let xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function() {
@@ -27,6 +31,9 @@ function shareAnnotation(annotation, username) {
   xhr.send('time=' + annotation.time + '&target=' + username + '&url=' + window.location.href + '&content=' + annotation.content);
 }
 
+/*
+look at server for annotations matching username
+*/
 function getMatchingAnnotations(username) {
   return new Promise(function(resolve, reject) {
     // GET NEW FROM SERVER THEN DELETE & SET STATE BASED ON CURRENT CONTENTS OF LOCALSTORAGE
@@ -34,8 +41,6 @@ function getMatchingAnnotations(username) {
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status === 200) {
         resolve(JSON.parse(xhr.responseText));
-      } else {
-        reject(Error(xhr.statusText));
       }
     }
     xhr.open("GET", "https://youtube-annotate-backend.herokuapp.com/api/match/" + username, true);
