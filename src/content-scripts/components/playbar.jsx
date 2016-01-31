@@ -105,13 +105,13 @@ export default class Playbar extends React.Component {
       return (
         <span>
           <div
-            style={m(styles.tick, {left: (portion - 2) + '%'})}
+            style={m(styles.tick, {left: portion + '%'})}
             onMouseOver={self.setTrue.bind(self, annotation.time)}
             onMouseOut={self.setFalse.bind(self, annotation.time)}
             onClick={self.seekTo.bind(self, annotation.time)}>
           </div>
           <div style={m(styles.tooltip, {left: (portion - 5) + '%'}, d)}>
-              contents here
+              {annotation.content}
           </div>
         </span>
       )

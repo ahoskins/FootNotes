@@ -25,10 +25,10 @@ export default class Annotater extends React.Component {
 
 	render() {
 		return (
-			<div>
+			<span>
 				<input style={styles.input} onChange={this.updateState.bind(this)} />
 				<button style={styles.button} onClick={this.props.save.bind(this, this.state.inputValue)}>Annotater</button>
-			</div>
+			</span>
 		)
 	}
 }
