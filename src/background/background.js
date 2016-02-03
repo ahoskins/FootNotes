@@ -1,19 +1,30 @@
 chrome.commands.onCommand.addListener(function(command) {
 	if (command === 'activate') {
-		chrome.tabs.executeScript(null, {file: '/build/bundle.js'}, function() {
-			// wait till the content script is running
-			chrome.identity.getProfileUserInfo(function(info) {
-				console.log(info.email);
-				sendIdentityInfo(info.email);
-			});
-		});
+		executeScript()
+		.then(getProfileUserInfo)
+		.then(function(info) { // must keep 'info' in closure, don't think there's a more elegant way?
+			queryTabs()
+			.then(function(tabs) {
+				chrome.tabs.sendMessage(tabs[0].id, {userName: info.email});
+			})
+		})
 	}
 });
 
-function sendIdentityInfo(email) {
-	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-	  chrome.tabs.sendMessage(tabs[0].id, {userName: email}, function(response) {
-	    console.log(response.farewell);
-	  });
-	});
+function executeScript() {
+	return new Promise(function(resolve, reject) {
+		chrome.tabs.executeScript(null, {file: '/build/bundle.js'}, resolve)
+	})
+}
+
+function getProfileUserInfo() {
+	return new Promise(function(resolve, reject) {
+		chrome.identity.getProfileUserInfo(resolve)
+	})
+}
+
+function queryTabs(info) {
+	return new Promise(function(resolve, reject) {
+		chrome.tabs.query({active: true, currentWindow: true}, resolve)
+	})
 }
