@@ -2,10 +2,10 @@ import React from 'react';
 import Annotater from './components/annotater.jsx';
 import Playbar from './components/playbar.jsx';
 import Share from './components/share.jsx';
-import SignIn from './components/signin.jsx';
-import SignOut from './components/signout.jsx';
 import io from 'socket.io-client';
+
 import {deleteAnnotationById, shareAnnotation, getMatchingAnnotations} from './network.js';
+import {injectYoutubePoller, injectSeekToTime} from './injecting.js';
 
 const styles = {
 	outer: {
@@ -14,8 +14,19 @@ const styles = {
 		backgroundColor: '#fefefe',
 		border: '1px solid #222222',
 		padding: '3px'
+	},
+	right: {
+		float: 'right',
+		marginRight: '10px',
+		fontSize: '0.8em'
 	}
 };
+
+/*
+- look at react patterns to refactor large root components
+- remove users and just use current chrome signed in user (done)
+- make toolip scrollable and not overflow on edges
+*/
 
 // make it global so the events don't go out of lexical scope
 let socket = null;
@@ -35,31 +46,18 @@ export default class Root extends React.Component {
 	Inject interval code into youtube.com, listen for currentTime and totalTime
 	*/
 	componentDidMount() {
-
-		// will be stringified
-		const injectedCode = '(' + function() {
-
-			// http://stackoverflow.com/questions/13290456/how-to-call-functions-in-the-original-pagetab-in-chrome-extensions
-			// http://stackoverflow.com/questions/9515704/building-a-chrome-extension-inject-code-in-a-page-using-a-content-script/9517879#9517879
-
-			// event 1 second update time, and attach it to custom event, then dispatch event
-			setInterval(function() {
-				const current = document.getElementById('movie_player').getCurrentTime();
-				const total = document.getElementById('movie_player').getDuration();
-				const customEvent = new CustomEvent('youtube', {'detail': {'current': current, 'total': total}});
-				document.dispatchEvent(customEvent);
-			}, 1000);
-
-		} + ')();';
-
-		// inject
-		const script = document.createElement('script');
-		script.textContent = injectedCode;
-		(document.head || document.documentElement).appendChild(script);
-		script.parentNode.removeChild(script);
-
-		// listen for this event and update state
 		var self = this;
+
+		this.mirrorStorageToState();
+
+		chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+				self.setState({userName: request.userName});
+				self.initForUser();
+		    sendResponse({farewell: "goodbye"});
+		  });
+
+		injectYoutubePoller();
+
 		document.addEventListener('youtube', function(e) {
 			self.setState({
 				currentTime: e.detail.current,
@@ -67,13 +65,41 @@ export default class Root extends React.Component {
 			});
 		});
 
-		// when URL changes, reload all the shit
 		window.addEventListener('hashChange', function() {
-			let self = this;
 			// let the URL actually change first
 			setTimeout(function() {
-				this.mirrorStorageToState();
+				self.mirrorStorageToState();
 			}, 100);
+		});
+	}
+
+	/*
+	can be called once the username is gotten from the background page
+	(the current chrome signed in user)
+	*/
+	initForUser() {
+		var self = this;
+		// poll DB for new results
+		getMatchingAnnotations(userName).then(function(response) {
+			for (let annotation of response) {
+				self.saveAnnotationFromServer(annotation);
+				deleteAnnotationById(annotation._id);
+			}
+		});
+
+		// socket io and tell server its username to watch
+		socket = io.connect("https://youtube-annotate-backend.herokuapp.com/");
+		socket.on('message', function(mes) {
+			socket.emit('my_name', self.state.userName);
+		});
+
+		socket.on('refresh_yo', function(mes) {
+			getMatchingAnnotations(self.state.userName).then(function(response) {
+				for (let annotation of response) {
+					self.saveAnnotationFromServer(annotation);
+					deleteAnnotationById(annotation._id);
+				}
+			})
 		});
 	}
 
@@ -108,6 +134,8 @@ export default class Root extends React.Component {
 			obj = obj['youtubeAnnotations'];
 
 			// check if already contains annotation
+			// TODO: this only checks for dups in the current URL, not all urls
+			// SOLUTION: only query server from annotations for the current page, when the page switches query for more
 			for (let existing of self.state.annotations) {
 				if (existing.time === annotation.time) {
 					return;
@@ -167,83 +195,21 @@ export default class Root extends React.Component {
 	respond to onclick the ticks in playbar
 	*/
 	seekTo(time) {
-		// inject some code
-		const injectedCode = '(' + function(time) {
-			document.getElementById('movie_player').seekTo(JSON.stringify(time), true);
-		} + ')(' + JSON.stringify(time) + ');';
-
-		const script = document.createElement('script');
-		script.textContent = injectedCode;
-		(document.head || document.documentElement).appendChild(script);
-		script.parentNode.removeChild(script);
-	}
-
-	/*
-	when they "login" get the fresh annotations for this user
-	*/
-	signIn(username) {
-		console.log('user');
-		this.setState({userName: username});
-
-		// might already have some in localstorage and none on the network
-		// (this gets called again if there are new annotations on the network)
-		this.mirrorStorageToState();
-
-		var self = this;
-		getMatchingAnnotations(username).then(function(response) {
-			for (let annotation of response) {
-				self.saveAnnotationFromServer(annotation);
-				deleteAnnotationById(annotation._id);
-			}
-		})
-
-		// SOCKET IO
-
-		socket = io.connect("https://youtube-annotate-backend.herokuapp.com/");
-		socket.on('message', function(mes) {
-			console.log(mes);
-			socket.emit('my_name', username);
-		});
-
-		socket.on('refresh_yo', function(mes) {
-			console.log('refresh-yo');
-			getMatchingAnnotations(username).then(function(response) {
-				for (let annotation of response) {
-					self.saveAnnotationFromServer(annotation);
-					deleteAnnotationById(annotation._id);
-				}
-			})
-		});
-	}
-
-	signOut() {
-		this.setState({userName: ''});
+		injectSeekToTime(time);
 	}
 
 	render() {
 		var self = this;
 		return (
 			<div style={styles.outer}>
-				{(function() {
-					if (self.state.userName === '') {
-						return (
-							<SignIn signIn={self.signIn.bind(self)} />
-						)
-					} else {
-						return (
-							<div>
-								<Annotater save={self.save.bind(self)} />
-								<SignOut signout={self.signOut.bind(self)} user={self.state.userName} />
-								<Share share={self.share.bind(self)} />
-								<Playbar
-									currentTime={self.state.currentTime}
-									totalTime={self.state.totalTime}
-									annotations={self.state.annotations}
-									seekTo={self.seekTo} />
-							</div>
-						)
-					}
-				}())}
+					<Annotater save={self.save.bind(self)} />
+					<span style={styles.right}>User: <b>{self.state.userName}</b></span>
+					<Share share={self.share.bind(self)} />
+					<Playbar
+						currentTime={self.state.currentTime}
+						totalTime={self.state.totalTime}
+						annotations={self.state.annotations}
+						seekTo={self.seekTo} />
 			</div>
 		)
 	}

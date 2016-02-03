@@ -14,7 +14,7 @@ const styles = {
 	},
   right: {
     float: 'right',
-    marginRight: '50px'
+    marginRight: '10px'
   }
 }
 

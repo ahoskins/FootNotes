@@ -36,7 +36,6 @@ look at server for annotations matching username
 */
 function getMatchingAnnotations(username) {
   return new Promise(function(resolve, reject) {
-    // GET NEW FROM SERVER THEN DELETE & SET STATE BASED ON CURRENT CONTENTS OF LOCALSTORAGE
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status === 200) {

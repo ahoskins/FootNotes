@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnvWKiZnYTPNQ8vtP+zU+DVH5H6anwh5gKMcM0grc3ihA6RmSVZZiE1/dCYhQ1+LHe+EteMbizWKIDd0/omS8UNP8nHv4WVHWtrM9iiaEMcgb0kz7A8dir8OAEc79pKopCeuNHw/6QoDd3rIT4IkfKtVhfQ5tvkeTNmHJR909kdXu170uXJue5uKs3OpnKbxSSlnv9V7cmVacV/sD6ny2ufgVhm8b20ABq+cj0nVchPqp2ZpDsu0gzJ5aRli0r84LdlGow+LjzF+YnlwdEuJ2isEeK5NeU47rz3W+sNVEqDO8lnL7jwbX5VpBVE3Ex61J7RKxbjxzW16jdGW06vPDCwIDAQAB",
   "name": "Youtube-rtc",
   "version": "1.0",
 
@@ -19,24 +19,23 @@
   },
 
   "permissions": [
-    "tabs",
+    "identity",
+    "identity.email",
     "https://ajax.googleapis.com/",
     "storage",
     "app",
     "windows",
     "background",
-    "identity",
-    "identity.email",
-    "activeTab",
-    "*://*/*"
+    "*://*/*",
+    "https://ssl.gstatic.com/",
+    "https://www.googleapis.com/",
+    "https://accounts.google.com/"
   ],
 
   "oauth2": {
-    "client_id": "183543876339-cei1o9ca1q3l6iiv9tovdm5b7jaoapsa.apps.googleusercontent.com",
+    "client_id": "28496067317-6f69fn7d0t0u69cef3gbl4srguiuunbm.apps.googleusercontent.com",
     "scopes": [
-      "https://www.google.com/m8/feeds/"
+      "https://www.googleapis.com/auth/drive"
     ]
-  },
-
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+  }
 }
