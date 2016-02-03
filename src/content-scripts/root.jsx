@@ -79,27 +79,26 @@ export default class Root extends React.Component {
 	(the current chrome signed in user)
 	*/
 	initForUser() {
-		// poll DB for new results
-		getMatchingAnnotations(this.state.userName).then((response) => {
+		let saveNewAnnotations = (response) => {
 			for (let annotation of response) {
 				this.saveAnnotationFromServer(annotation);
 				deleteAnnotationById(annotation._id);
 			}
-		});
+		}
+		// poll DB for new results
+		getMatchingAnnotations(this.state.userName)
+		.then(saveNewAnnotations);
 
-		// socket io and tell server its username to watch
+		// socket-io connect and tell server its username to watch
 		socket = io.connect("https://youtube-annotate-backend.herokuapp.com/");
 		socket.on('message', (mes) => {
 			socket.emit('my_name', this.state.userName);
 		});
 
+		// triggered when new entry for username put into DB (by a different user)
 		socket.on('refresh_yo', (mes) => {
-			getMatchingAnnotations(this.state.userName).then((response) => {
-				for (let annotation of response) {
-					this.saveAnnotationFromServer(annotation);
-					deleteAnnotationById(annotation._id);
-				}
-			})
+			getMatchingAnnotations(this.state.userName)
+			.then(saveNewAnnotations);
 		});
 	}
 
