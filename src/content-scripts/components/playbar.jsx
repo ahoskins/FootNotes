@@ -107,7 +107,10 @@ export default class Playbar extends React.Component {
             onMouseOut={this.setFalse.bind(this, annotation.time)}
             onClick={this.seekTo.bind(this, annotation.time)}>
           </div>
-          <div style={m(styles.tooltip, {left: (portion - 5) + '%'}, d)}>
+          <div
+            style={m(styles.tooltip, {left: (portion - 5) + '%'}, d)}
+            onMouseOver={this.setTrue.bind(this, annotation.time)}
+            onMouseOut={this.setFalse.bind(this, annotation.time)}>
               {annotation.content}
           </div>
         </span>
