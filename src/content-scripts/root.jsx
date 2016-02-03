@@ -24,7 +24,8 @@ const styles = {
 
 /*
 - make toolip scrollable and not overflow on edges
-- handle chrome logins midway through lifecycle
+- handle chrome logins midway through lifecycle (done)
+- add author of each annotatation
 */
 
 // make it global so the events don't go out of lexical scope

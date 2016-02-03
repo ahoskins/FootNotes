@@ -15,20 +15,16 @@ const styles = {
     height: '5px'
   },
   tick: {
-    backgroundColor: '#f3b61f',
+    backgroundColor: 'black',
     height: '22px',
-    width: '5px',
+    width: '0.4%',
     position: 'absolute',
     display: 'inline-block'
   },
   tooltip: {
-    backgroundColor: '#607D8B',
-    height: '25px',
     width: '12%',
     position: 'absolute',
     marginTop: '15px',
-    borderRadius: '5px',
-    color: 'white',
     lineHeight: '30px',
     padding: '3px'
   }
@@ -99,6 +95,24 @@ export default class Playbar extends React.Component {
         d.display = 'inline-block';
       }
 
+      let orientation = null;
+      if (portion > 50) {
+        // tooltip go to the left
+        let r = 100 - portion - 0.4; // compensate for tick width
+        orientation = {
+          right: r + '%',
+          textAlign: 'right',
+          borderRight: '1px solid #f3b61f',
+        }
+      } else {
+        // tooltip go to the right
+        orientation = {
+          left: portion + '%',
+          textAlign: 'left',
+          borderLeft: '1px solid #f3b61f'
+        }
+      }
+
       return (
         <span key={annotation.time}>
           <div
@@ -108,7 +122,7 @@ export default class Playbar extends React.Component {
             onClick={this.seekTo.bind(this, annotation.time)}>
           </div>
           <div
-            style={m(styles.tooltip, {left: (portion - 5) + '%'}, d)}
+            style={m(styles.tooltip, orientation, d)}
             onMouseOver={this.setTrue.bind(this, annotation.time)}
             onMouseOut={this.setFalse.bind(this, annotation.time)}>
               {annotation.content}
