@@ -46,29 +46,29 @@ export default class Root extends React.Component {
 	Inject interval code into youtube.com, listen for currentTime and totalTime
 	*/
 	componentDidMount() {
-		var self = this;
 
 		this.mirrorStorageToState();
 
-		chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-				self.setState({userName: request.userName});
-				self.initForUser();
+		chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+				console.log(request.userName);
+				this.setState({userName: request.userName});
+				this.initForUser();
 		    sendResponse({farewell: "goodbye"});
 		  });
 
 		injectYoutubePoller();
 
-		document.addEventListener('youtube', function(e) {
-			self.setState({
+		document.addEventListener('youtube', (e) => {
+			this.setState({
 				currentTime: e.detail.current,
 				totalTime: e.detail.total
 			});
 		});
 
-		window.addEventListener('hashChange', function() {
+		window.addEventListener('hashChange', () => {
 			// let the URL actually change first
 			setTimeout(function() {
-				self.mirrorStorageToState();
+				this.mirrorStorageToState();
 			}, 100);
 		});
 	}
@@ -78,25 +78,24 @@ export default class Root extends React.Component {
 	(the current chrome signed in user)
 	*/
 	initForUser() {
-		var self = this;
 		// poll DB for new results
-		getMatchingAnnotations(userName).then(function(response) {
+		getMatchingAnnotations(this.state.userName).then((response) => {
 			for (let annotation of response) {
-				self.saveAnnotationFromServer(annotation);
+				this.saveAnnotationFromServer(annotation);
 				deleteAnnotationById(annotation._id);
 			}
 		});
 
 		// socket io and tell server its username to watch
 		socket = io.connect("https://youtube-annotate-backend.herokuapp.com/");
-		socket.on('message', function(mes) {
-			socket.emit('my_name', self.state.userName);
+		socket.on('message', (mes) => {
+			socket.emit('my_name', this.state.userName);
 		});
 
-		socket.on('refresh_yo', function(mes) {
-			getMatchingAnnotations(self.state.userName).then(function(response) {
+		socket.on('refresh_yo', (mes) => {
+			getMatchingAnnotations(this.state.userName).then((response) => {
 				for (let annotation of response) {
-					self.saveAnnotationFromServer(annotation);
+					this.saveAnnotationFromServer(annotation);
 					deleteAnnotationById(annotation._id);
 				}
 			})
@@ -107,16 +106,15 @@ export default class Root extends React.Component {
 	Set component state based on annotations at current url
 	*/
 	mirrorStorageToState() {
-		let self = this;
-		chrome.storage.sync.get('youtubeAnnotations', function(obj) {
+		chrome.storage.sync.get('youtubeAnnotations', (obj) => {
 			if (Object.keys(obj).length === 0) obj['youtubeAnnotations'] = {};
 			obj = obj['youtubeAnnotations'];
 
 			// mirror current annotations for url if they exist
 			if (obj[window.location.href] !== undefined) {
-				self.setState({annotations: obj[window.location.href]});
+				this.setState({annotations: obj[window.location.href]});
 			} else {
-				self.setState({annotations: []});
+				this.setState({annotations: []});
 			}
 		});
 	}
@@ -128,15 +126,14 @@ export default class Root extends React.Component {
 	saveAnnotationFromServer(annotation) {
 		console.dir(annotation);
 
-		var self = this;
-		chrome.storage.sync.get('youtubeAnnotations', function(obj) {
+		chrome.storage.sync.get('youtubeAnnotations', (obj) => {
 			if (Object.keys(obj).length === 0) obj['youtubeAnnotations'] = {};
 			obj = obj['youtubeAnnotations'];
 
 			// check if already contains annotation
 			// TODO: this only checks for dups in the current URL, not all urls
 			// SOLUTION: only query server from annotations for the current page, when the page switches query for more
-			for (let existing of self.state.annotations) {
+			for (let existing of this.state.annotations) {
 				if (existing.time === annotation.time) {
 					return;
 				}
@@ -150,8 +147,8 @@ export default class Root extends React.Component {
 			});
 			obj[annotation.url] = UrlAnnotations;
 
-			chrome.storage.sync.set({'youtubeAnnotations': obj}, function() {
-				self.mirrorStorageToState();
+			chrome.storage.sync.set({'youtubeAnnotations': obj}, () => {
+				this.mirrorStorageToState();
 			})
 		})
 	}
@@ -160,11 +157,8 @@ export default class Root extends React.Component {
 	Saves a annotation from locally from (not from a friend)
 	*/
 	save(annotation) {
-		const self = this;
-		// chrome.storage.sync.clear();
-
 		// save annotation along with currentTime in localstorage
-		chrome.storage.sync.get('youtubeAnnotations', function(obj) {
+		chrome.storage.sync.get('youtubeAnnotations', (obj) => {
 			if (Object.keys(obj).length === 0) obj['youtubeAnnotations'] = {};
 			obj = obj['youtubeAnnotations'];
 
@@ -172,12 +166,12 @@ export default class Root extends React.Component {
 			const UrlAnnotations = obj[url] || [];
 			UrlAnnotations.push({
 				'content': annotation,
-				'time': self.state.currentTime
+				'time': this.state.currentTime
 			});
 			obj[url] = UrlAnnotations;
 
-			chrome.storage.sync.set({'youtubeAnnotations': obj}, function() {
-				self.mirrorStorageToState();
+			chrome.storage.sync.set({'youtubeAnnotations': obj}, () => {
+				this.mirrorStorageToState();
 			});
 		});
 	}
@@ -199,17 +193,16 @@ export default class Root extends React.Component {
 	}
 
 	render() {
-		var self = this;
 		return (
 			<div style={styles.outer}>
-					<Annotater save={self.save.bind(self)} />
-					<span style={styles.right}>User: <b>{self.state.userName}</b></span>
-					<Share share={self.share.bind(self)} />
+					<Annotater save={this.save.bind(this)} />
+					<span style={styles.right}>User: <b>{this.state.userName}</b></span>
+					<Share share={this.share.bind(this)} />
 					<Playbar
-						currentTime={self.state.currentTime}
-						totalTime={self.state.totalTime}
-						annotations={self.state.annotations}
-						seekTo={self.seekTo} />
+						currentTime={this.state.currentTime}
+						totalTime={this.state.totalTime}
+						annotations={this.state.annotations}
+						seekTo={this.seekTo} />
 			</div>
 		)
 	}

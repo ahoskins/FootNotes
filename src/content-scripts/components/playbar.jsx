@@ -75,15 +75,10 @@ export default class Playbar extends React.Component {
   }
 
   initAllToolTipsNotActive() {
-    let self = this;
-    this.props.annotations.forEach(function(annotation) {
-      self.state.hovered[annotation.time] = false;
+    this.props.annotations.forEach((annotation) => {
+      this.state.hovered[annotation.time] = false;
     })
     this.setState({hovered: this.state.hovered});
-  }
-
-  componentWillReceiveProps(newProps) {
-    // this.initAllToolTipsNotActive();
   }
 
   seekTo(time) {
@@ -95,13 +90,12 @@ export default class Playbar extends React.Component {
     const playedPercent = (this.props.currentTime / this.props.totalTime) * 100
     const restPercent = 100 - playedPercent;
 
-    var self = this;
-    let ticks = this.props.annotations.map(function(annotation) {
-      let portion = (annotation.time / self.props.totalTime) * 100;
+    let ticks = this.props.annotations.map((annotation) => {
+      let portion = (annotation.time / this.props.totalTime) * 100;
 
       // if not set then display none
       let d = {display: 'none'};
-      if (self.state.hovered[annotation.time] === true) {
+      if (this.state.hovered[annotation.time] === true) {
         d.display = 'inline-block';
       }
 
@@ -109,9 +103,9 @@ export default class Playbar extends React.Component {
         <span key={annotation.time}>
           <div
             style={m(styles.tick, {left: portion + '%'})}
-            onMouseOver={self.setTrue.bind(self, annotation.time)}
-            onMouseOut={self.setFalse.bind(self, annotation.time)}
-            onClick={self.seekTo.bind(self, annotation.time)}>
+            onMouseOver={this.setTrue.bind(this, annotation.time)}
+            onMouseOut={this.setFalse.bind(this, annotation.time)}
+            onClick={this.seekTo.bind(this, annotation.time)}>
           </div>
           <div style={m(styles.tooltip, {left: (portion - 5) + '%'}, d)}>
               {annotation.content}
