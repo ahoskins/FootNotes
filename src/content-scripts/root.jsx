@@ -23,10 +23,8 @@ const styles = {
 };
 
 /*
-- look at react patterns to refactor large root components (done, it's been improved enough)
-- remove users and just use current chrome signed in user (done)
 - make toolip scrollable and not overflow on edges
-- check all of localstorage when getting new updates from DB (done)
+- handle chrome logins midway through lifecycle
 */
 
 // make it global so the events don't go out of lexical scope
@@ -52,6 +50,7 @@ export default class Root extends React.Component {
 
 		// listen for background page to tell who the user is.
 		// then get new results from DB
+		// also handles listening for a change of account
 		chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 				this.setState({userName: request.userName});
 				this.initForUser();

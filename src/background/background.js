@@ -28,3 +28,17 @@ function queryTabs(info) {
 		chrome.tabs.query({active: true, currentWindow: true}, resolve)
 	})
 }
+
+// handle new sign-ins (most likely not necessary code because switching the user
+// seems to open a new window, so this should never actually be triggered)
+chrome.identity.onSignInChanged(function(account, signedIn) {
+	if (signedIn) {
+		getProfileUserInfo()
+		.then(function(info) {
+			queryTabs()
+			.then(function(tabs) {
+				chrome.tabs.sendMessage(tabs[0].id, {userName: info.email});
+			})
+		})
+	}
+})
