@@ -23,9 +23,10 @@ const styles = {
 };
 
 /*
-- look at react patterns to refactor large root components
+- look at react patterns to refactor large root components (done, it's been improved enough)
 - remove users and just use current chrome signed in user (done)
 - make toolip scrollable and not overflow on edges
+- check all of localstorage when getting new updates from DB (done)
 */
 
 // make it global so the events don't go out of lexical scope
@@ -49,11 +50,11 @@ export default class Root extends React.Component {
 
 		this.mirrorStorageToState();
 
+		// listen for background page to tell who the user is.
+		// then get new results from DB
 		chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-				console.log(request.userName);
 				this.setState({userName: request.userName});
 				this.initForUser();
-		    sendResponse({farewell: "goodbye"});
 		  });
 
 		injectYoutubePoller();
@@ -120,32 +121,30 @@ export default class Root extends React.Component {
 	}
 
 	/*
-	save an annotation from server into localstorage
-	if it already exists (already has been shared) don't add again
+	generic annotation server (from user or server).
+	check if already exits (timestamps identical).
+	update state after.
 	*/
-	saveAnnotationFromServer(annotation) {
-		console.dir(annotation);
-
+	saveAnnotation(content, time, url) {
 		chrome.storage.sync.get('youtubeAnnotations', (obj) => {
 			if (Object.keys(obj).length === 0) obj['youtubeAnnotations'] = {};
 			obj = obj['youtubeAnnotations'];
 
-			// check if already contains annotation
-			// TODO: this only checks for dups in the current URL, not all urls
-			// SOLUTION: only query server from annotations for the current page, when the page switches query for more
-			for (let existing of this.state.annotations) {
-				if (existing.time === annotation.time) {
+			// each annotation has a target URL, check if it already exists in localstorage
+			let urlAnnotations = obj[url] || [];
+			for (let existing in urlAnnotations) {
+				// timestamp is the unique ID (it's a couple digits, very unique)
+				if (existing.time === time) {
 					return;
 				}
 			}
 
 			// annotation doesn't exist yet, add it to localstorage
-			const UrlAnnotations = obj[annotation.url] || [];
-			UrlAnnotations.push({
-				'content': annotation.content,
-				'time': annotation.time
+			urlAnnotations.push({
+				'content': content,
+				'time': time
 			});
-			obj[annotation.url] = UrlAnnotations;
+			obj[url] = urlAnnotations;
 
 			chrome.storage.sync.set({'youtubeAnnotations': obj}, () => {
 				this.mirrorStorageToState();
@@ -154,26 +153,17 @@ export default class Root extends React.Component {
 	}
 
 	/*
-	Saves a annotation from locally from (not from a friend)
+	save an annotation from server
 	*/
-	save(annotation) {
-		// save annotation along with currentTime in localstorage
-		chrome.storage.sync.get('youtubeAnnotations', (obj) => {
-			if (Object.keys(obj).length === 0) obj['youtubeAnnotations'] = {};
-			obj = obj['youtubeAnnotations'];
+	saveAnnotationFromServer(annotation) {
+		this.saveAnnotation(annotation.content, annotation.time, annotation.url);
+	}
 
-			const url = window.location.href;
-			const UrlAnnotations = obj[url] || [];
-			UrlAnnotations.push({
-				'content': annotation,
-				'time': this.state.currentTime
-			});
-			obj[url] = UrlAnnotations;
-
-			chrome.storage.sync.set({'youtubeAnnotations': obj}, () => {
-				this.mirrorStorageToState();
-			});
-		});
+	/*
+	Saves an annotation from user
+	*/
+	save(content) {
+		this.saveAnnotation(content, this.state.currentTime, window.location.href);
 	}
 
 	/*
