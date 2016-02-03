@@ -38,7 +38,8 @@ export default class Root extends React.Component {
 			currentTime: null,
 			totalTime: null,
 			annotations: [],
-			userName: ''
+			userName: '',
+			url: ''
 		}
 	}
 
@@ -46,7 +47,6 @@ export default class Root extends React.Component {
 	Inject interval code into youtube.com, listen for currentTime and totalTime
 	*/
 	componentDidMount() {
-
 		this.mirrorStorageToState();
 
 		// listen for background page to tell who the user is.
@@ -59,18 +59,17 @@ export default class Root extends React.Component {
 
 		injectYoutubePoller();
 
+		this.setState({url: window.location.href});
+
 		document.addEventListener('youtube', (e) => {
+			if (e.detail.location !== this.state.url) {
+				this.mirrorStorageToState();
+			}
 			this.setState({
 				currentTime: e.detail.current,
-				totalTime: e.detail.total
+				totalTime: e.detail.total,
+				url: e.detail.location
 			});
-		});
-
-		window.addEventListener('hashChange', () => {
-			// let the URL actually change first
-			setTimeout(function() {
-				this.mirrorStorageToState();
-			}, 100);
 		});
 	}
 

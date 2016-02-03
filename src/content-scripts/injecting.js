@@ -3,7 +3,7 @@ function injectYoutubePoller() {
     setInterval(function() {
       const current = document.getElementById('movie_player').getCurrentTime();
       const total = document.getElementById('movie_player').getDuration();
-      const customEvent = new CustomEvent('youtube', {'detail': {'current': current, 'total': total}});
+      const customEvent = new CustomEvent('youtube', {'detail': {'current': current, 'total': total, 'location': window.location.href}});
       document.dispatchEvent(customEvent);
     }, 1000);
 
