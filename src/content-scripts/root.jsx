@@ -23,8 +23,6 @@ const styles = {
 };
 
 /*
-- make toolip scrollable and not overflow on edges
-- handle chrome logins midway through lifecycle (done)
 - add author of each annotatation
 */
 

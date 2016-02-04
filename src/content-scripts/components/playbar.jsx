@@ -112,6 +112,8 @@ export default class Playbar extends React.Component {
       let d = {display: 'none'};
       if (this.state.hovered[annotation.time] === true) {
         d.display = 'inline-block';
+      } else if (this.props.currentTime > (annotation.time - 2) && this.props.currentTime < (annotation.time + 2)) {
+        d.display = 'inline-block';
       }
 
       let orientation = null;
