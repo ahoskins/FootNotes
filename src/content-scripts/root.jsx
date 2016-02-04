@@ -76,7 +76,28 @@ export default class Root extends React.Component {
 	(the current chrome signed in user)
 	*/
 	initForUser() {
+		let removeDups = (array) => {
+			let exists = (input, arr) => {
+				for (let entry of arr) {
+					if (entry.time === input.time) {
+						return true;
+					}
+				}
+				return false;
+			}
+
+			let res = []
+			for (let entry of array) {
+				if (exists(entry, res)) {
+					continue;
+				}
+				res.push(entry);
+			}
+			return res;
+		}
+
 		let saveNewAnnotations = (response) => {
+			response = removeDups(response);
 			for (let annotation of response) {
 				this.saveAnnotationFromServer(annotation);
 				deleteAnnotationById(annotation._id);
@@ -93,9 +114,10 @@ export default class Root extends React.Component {
 		});
 
 		// triggered when new entry for username put into DB (by a different user)
-		socket.on('refresh_yo', (mes) => {
-			getMatchingAnnotations(this.state.userName)
-			.then(saveNewAnnotations);
+		// each new record will get added once here
+		socket.on('new_record', (annotation) => {
+			console.log('new record from socket');
+			this.saveAnnotationFromServer(annotation);
 		});
 	}
 
@@ -128,7 +150,7 @@ export default class Root extends React.Component {
 
 			// each annotation has a target URL, check if it already exists in localstorage
 			let urlAnnotations = obj[url] || [];
-			for (let existing in urlAnnotations) {
+			for (let existing of urlAnnotations) {
 				// timestamp is the unique ID (it's a couple digits, very unique)
 				if (existing.time === time) {
 					return;
@@ -153,7 +175,8 @@ export default class Root extends React.Component {
 	save an annotation from server
 	*/
 	saveAnnotationFromServer(annotation) {
-		this.saveAnnotation(annotation.content, annotation.time, annotation.url, annotation.author);
+		// convert to number first
+		this.saveAnnotation(annotation.content, Number(annotation.time), annotation.url, annotation.author);
 	}
 
 	/*
@@ -175,7 +198,7 @@ export default class Root extends React.Component {
 			username = username.slice(0, username.indexOf('@'));
 		}
 		for (let annotation of this.state.annotations) {
-			shareAnnotation(annotation, username, this.state.userName);
+			shareAnnotation(annotation, username);
 		}
 	}
 

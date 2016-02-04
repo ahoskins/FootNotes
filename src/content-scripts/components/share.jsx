@@ -33,8 +33,8 @@ export default class Share extends React.Component {
 	render() {
 		return (
 			<span style={styles.right}>
-				<button style={styles.button} onClick={this.props.share.bind(this, this.state.inputValue)}>Share With: </button>
         <input style={styles.input} onChange={this.updateState.bind(this)} placeholder="any google account" />
+				<button style={styles.button} onClick={this.props.share.bind(this, this.state.inputValue)}>Share</button>
 			</span>
 		)
 	}
