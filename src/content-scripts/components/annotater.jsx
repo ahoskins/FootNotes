@@ -7,10 +7,11 @@ const styles = {
 		borderRadius: '2px',
 		cursor: 'pointer',
 		padding: '2px',
-		backgroundColor: '#d3d3d3'
+		backgroundColor: '#f5b83f'
 	},
 	input: {
-		margin: '2px'
+		margin: '2px',
+		width: '20%'
 	},
 	outer: {
 		marginLeft: '20px'
@@ -30,7 +31,7 @@ export default class Annotater extends React.Component {
 	render() {
 		return (
 			<span style={styles.outer}>
-				<input style={styles.input} onChange={this.updateState.bind(this)} />
+				<input style={styles.input} onChange={this.updateState.bind(this)} placeholder="write a comment" />
 				<button style={styles.button} onClick={this.props.save.bind(this, this.state.inputValue)}>Comment</button>
 			</span>
 		)

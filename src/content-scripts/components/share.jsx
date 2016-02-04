@@ -7,7 +7,7 @@ const styles = {
 		borderRadius: '2px',
 		cursor: 'pointer',
 		padding: '2px',
-    backgroundColor: '#d3d3d3'
+    backgroundColor: '#f5b83f'
 	},
 	input: {
 		margin: '2px'
@@ -34,7 +34,7 @@ export default class Share extends React.Component {
 		return (
 			<span style={styles.right}>
 				<button style={styles.button} onClick={this.props.share.bind(this, this.state.inputValue)}>Share With: </button>
-        <input style={styles.input} onChange={this.updateState.bind(this)} />
+        <input style={styles.input} onChange={this.updateState.bind(this)} placeholder="any google account" />
 			</span>
 		)
 	}
