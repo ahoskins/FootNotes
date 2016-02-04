@@ -105,52 +105,88 @@ export default class Playbar extends React.Component {
     const playedPercent = (this.props.currentTime / this.props.totalTime) * 100
     const restPercent = 100 - playedPercent;
 
-    let ticks = this.props.annotations.map((annotation) => {
-      let portion = (annotation.time / this.props.totalTime) * 100;
-
-      // if not set then display none
-      let d = {display: 'none'};
-      if (this.state.hovered[annotation.time] === true) {
-        d.display = 'inline-block';
-      } else if (this.props.currentTime > (annotation.time - 2) && this.props.currentTime < (annotation.time + 2)) {
-        d.display = 'inline-block';
-      }
-
-      let orientation = null;
-      if (portion > 50) {
-        // tooltip go to the left
-        let r = 100 - portion - 0.4; // compensate for tick width
-        orientation = {
-          right: r + '%',
-          textAlign: 'right',
-          borderRight: '1px solid #f3b61f',
-        }
-      } else {
-        // tooltip go to the right
-        orientation = {
-          left: portion + '%',
-          textAlign: 'left',
-          borderLeft: '1px solid #f3b61f'
+    /*
+    Tooltip showing algorithm rules:
+    - only one is shown at once
+    - hovered always wins
+    - if none hovered, find the closest within +-2 seconds
+    */
+    let ticks = [];
+    let shownAnnotation = null
+    if (this.props.annotations.length >= 1) {
+      // if hovered, show this and we're done
+      for (let annotation of this.props.annotations) {
+        if (this.state.hovered[annotation.time] === true) {
+          shownAnnotation = annotation;
         }
       }
 
-      return (
-        <span key={annotation.time}>
-          <div
-            style={m(styles.tick, {left: portion + '%'})}
-            onMouseOver={this.setTrue.bind(this, annotation.time)}
-            onMouseOut={this.setFalse.bind(this, annotation.time)}
-            onClick={this.seekTo.bind(this, annotation.time)}>
-          </div>
-          <div
-            style={m(styles.tooltip, orientation, d)}
-            onMouseOver={this.setTrue.bind(this, annotation.time)}
-            onMouseOut={this.setFalse.bind(this, annotation.time)}>
-              {annotation.content}
-          </div>
-        </span>
-      )
-    })
+      // only look for closed within 2 if none hovered
+      if (! shownAnnotation) {
+        for (let annotation of this.props.annotations) {
+          // is it within range to be shown?
+          if (this.props.currentTime > (annotation.time - 2) && this.props.currentTime < (annotation.time + 2)) {
+            // is it closer than an already found candidate
+            if (! shownAnnotation) {
+              shownAnnotation = annotation;
+            } else {
+              // is it closer than the current?
+              if (Math.abs(annotation.time - this.props.currentTime) < Math.abs(shownAnnotation.time - this.props.currentTime)) {
+                shownAnnotation = annotation;
+              }
+            }
+          }
+        }
+      }
+
+      // shownAnnotation may or may not be null, depends if one should be shown
+      // create the ticks and if any of them === shownAnnotation, then show it!
+      ticks = this.props.annotations.map((annotation) => {
+        let portion = (annotation.time / this.props.totalTime) * 100;
+
+        let d = {display: 'none'};
+        // are you the chosen one?
+        if (annotation === shownAnnotation) {
+          d.display = 'inline-block';
+        }
+
+        let orientation = null;
+        if (portion > 50) {
+          // tooltip go to the left
+          let r = 100 - portion - 0.4; // compensate for tick width
+          orientation = {
+            right: r + '%',
+            textAlign: 'right',
+            borderRight: '1px solid #f3b61f',
+          }
+        } else {
+          // tooltip go to the right
+          orientation = {
+            left: portion + '%',
+            textAlign: 'left',
+            borderLeft: '1px solid #f3b61f'
+          }
+        }
+
+        return (
+          <span key={annotation.time}>
+            <div
+              style={m(styles.tick, {left: portion + '%'})}
+              onMouseOver={this.setTrue.bind(this, annotation.time)}
+              onMouseOut={this.setFalse.bind(this, annotation.time)}
+              onClick={this.seekTo.bind(this, annotation.time)}>
+            </div>
+            <div
+              style={m(styles.tooltip, orientation, d)}
+              onMouseOver={this.setTrue.bind(this, annotation.time)}
+              onMouseOut={this.setFalse.bind(this, annotation.time)}>
+                {annotation.content}
+            </div>
+          </span>
+        )
+      })
+
+    }
 
     return (
       <div style={styles.outer}>
