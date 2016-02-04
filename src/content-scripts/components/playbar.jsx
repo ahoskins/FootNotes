@@ -25,7 +25,6 @@ const styles = {
     cursor: 'pointer'
   },
   tooltip: {
-    width: '12%',
     position: 'absolute',
     marginTop: '15px',
     lineHeight: '30px',
@@ -180,7 +179,7 @@ export default class Playbar extends React.Component {
               style={m(styles.tooltip, orientation, d)}
               onMouseOver={this.setTrue.bind(this, annotation.time)}
               onMouseOut={this.setFalse.bind(this, annotation.time)}>
-                {annotation.content}
+                {annotation.author + ': ' + annotation.content}
             </div>
           </span>
         )

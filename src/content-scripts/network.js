@@ -19,7 +19,7 @@ function deleteAnnotationById(id) {
 /*
 create annotation on server for specified user
 */
-function shareAnnotation(annotation, username) {
+function shareAnnotation(annotation, username, author) {
   let xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function() {
     if (xhr.readyState === 4 && xhr.status === 200) {
@@ -28,7 +28,7 @@ function shareAnnotation(annotation, username) {
   }
   xhr.open("POST", "https://youtube-annotate-backend.herokuapp.com/api/create/", true);
   xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-  xhr.send('time=' + annotation.time + '&target=' + username + '&url=' + window.location.href + '&content=' + annotation.content);
+  xhr.send('time=' + annotation.time + '&target=' + username + '&url=' + window.location.href + '&content=' + annotation.content + '&author=' + author);
 }
 
 /*

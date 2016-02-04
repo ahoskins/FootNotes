@@ -121,7 +121,7 @@ export default class Root extends React.Component {
 	check if already exits (timestamps identical).
 	update state after.
 	*/
-	saveAnnotation(content, time, url) {
+	saveAnnotation(content, time, url, author) {
 		chrome.storage.sync.get('youtubeAnnotations', (obj) => {
 			if (Object.keys(obj).length === 0) obj['youtubeAnnotations'] = {};
 			obj = obj['youtubeAnnotations'];
@@ -138,7 +138,8 @@ export default class Root extends React.Component {
 			// annotation doesn't exist yet, add it to localstorage
 			urlAnnotations.push({
 				'content': content,
-				'time': time
+				'time': time,
+				'author': author
 			});
 			obj[url] = urlAnnotations;
 
@@ -152,14 +153,14 @@ export default class Root extends React.Component {
 	save an annotation from server
 	*/
 	saveAnnotationFromServer(annotation) {
-		this.saveAnnotation(annotation.content, annotation.time, annotation.url);
+		this.saveAnnotation(annotation.content, annotation.time, annotation.url, annotation.author);
 	}
 
 	/*
 	Saves an annotation from user
 	*/
 	save(content) {
-		this.saveAnnotation(content, this.state.currentTime, window.location.href);
+		this.saveAnnotation(content, this.state.currentTime, window.location.href, this.state.userName);
 	}
 
 	/*
@@ -167,7 +168,7 @@ export default class Root extends React.Component {
 	*/
 	share(username) {
 		for (let annotation of this.state.annotations) {
-			shareAnnotation(annotation, username);
+			shareAnnotation(annotation, username, this.state.userName);
 		}
 	}
 
