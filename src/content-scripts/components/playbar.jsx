@@ -7,19 +7,22 @@ const styles = {
   played: {
     display: 'inline-block',
     backgroundColor: 'red',
-    height: '5px'
+    height: '5px',
+    cursor: 'pointer'
   },
   rest: {
     display: 'inline-block',
     backgroundColor: 'black',
-    height: '5px'
+    height: '5px',
+    cursor: 'pointer'
   },
   tick: {
     backgroundColor: 'black',
     height: '22px',
     width: '0.4%',
     position: 'absolute',
-    display: 'inline-block'
+    display: 'inline-block',
+    cursor: 'pointer'
   },
   tooltip: {
     width: '12%',
