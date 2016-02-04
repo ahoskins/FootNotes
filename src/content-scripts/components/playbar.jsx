@@ -1,4 +1,5 @@
 import React from 'react';
+import {makePastelColor} from '../colorhash.js';
 
 const styles = {
   outer: {
@@ -17,11 +18,11 @@ const styles = {
     cursor: 'pointer'
   },
   tick: {
-    backgroundColor: 'black',
     height: '22px',
     width: '0.4%',
     position: 'absolute',
     display: 'inline-block',
+    borderRadius: '2px',
     cursor: 'pointer'
   },
   tooltip: {
@@ -167,10 +168,14 @@ export default class Playbar extends React.Component {
           }
         }
 
+        let color = {
+          backgroundColor: '#' + makePastelColor(annotation.author)
+        }
+
         return (
           <span key={annotation.time}>
             <div
-              style={m(styles.tick, {left: portion + '%'})}
+              style={m(styles.tick, {left: portion + '%'}, color)}
               onMouseOver={this.setTrue.bind(this, annotation.time)}
               onMouseOut={this.setFalse.bind(this, annotation.time)}
               onClick={this.seekTo.bind(this, annotation.time)}>
