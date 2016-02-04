@@ -78,8 +78,24 @@ export default class Playbar extends React.Component {
   }
 
   seekTo(time) {
-    console.log(time);
     this.props.seekTo(time);
+  }
+
+  playbarClickPlayed(widthInPercent, e) {
+    const ne = e.nativeEvent;
+    const portionIntoLeft = ne.clientX / ne.target.clientWidth;
+    const totalPortion = portionIntoLeft * (widthInPercent / 100);
+
+    this.props.seekTo(this.props.totalTime * totalPortion);
+  }
+
+  playbarClickRest(restPercent, e) {
+    const ne = e.nativeEvent;
+    const restPortion = restPercent / 100;
+    const playedPortion = 1 - restPortion;
+    const contributingPercent = ((ne.clientX - ne.target.offsetLeft) / ne.target.clientWidth) * restPortion;
+
+    this.props.seekTo((playedPortion + contributingPercent) * this.props.totalTime);
   }
 
   render() {
@@ -133,8 +149,13 @@ export default class Playbar extends React.Component {
 
     return (
       <div style={styles.outer}>
-        <div style={m(styles.played, {width: playedPercent + '%' })}></div>
-        <div style={m(styles.rest, {width: restPercent + '%' })}></div>
+        <div
+          style={m(styles.played, {width: playedPercent + '%' })}
+          onClick={this.playbarClickPlayed.bind(this, playedPercent)}>
+        </div>
+        <div
+          style={m(styles.rest, {width: restPercent + '%' })}
+          onClick={this.playbarClickRest.bind(this, restPercent)}></div>
         {ticks}
       </div>
     )
