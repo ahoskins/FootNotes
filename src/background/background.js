@@ -37,7 +37,7 @@ chrome.identity.onSignInChanged(function(account, signedIn) {
 		.then(function(info) {
 			queryTabs()
 			.then(function(tabs) {
-				chrome.tabs.sendMessage(tabs[0].id, {userName: info.email.slice(0, info.email.indexOf('@')});
+				chrome.tabs.sendMessage(tabs[0].id, {userName: info.email.slice(0, info.email.indexOf('@'))});
 			})
 		})
 	}
