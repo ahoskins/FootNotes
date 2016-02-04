@@ -30,6 +30,10 @@ const styles = {
     marginTop: '15px',
     lineHeight: '30px',
     padding: '3px'
+  },
+  author: {
+    color: '#f5b83f',
+    padding: '0px 5px'
   }
 }
 
@@ -184,7 +188,8 @@ export default class Playbar extends React.Component {
               style={m(styles.tooltip, orientation, d)}
               onMouseOver={this.setTrue.bind(this, annotation.time)}
               onMouseOut={this.setFalse.bind(this, annotation.time)}>
-                {annotation.author + ': ' + annotation.content}
+                <span style={styles.author}>{annotation.author}:</span>
+                {annotation.content}
             </div>
           </span>
         )

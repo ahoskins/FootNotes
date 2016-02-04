@@ -167,6 +167,10 @@ export default class Root extends React.Component {
 	share each annotation on the current URL with the chosen user
 	*/
 	share(username) {
+		// remove @gmail.com if they put it
+		if (username.indexOf('@') > -1) {
+			username = username.slice(0, username.indexOf('@'));
+		}
 		for (let annotation of this.state.annotations) {
 			shareAnnotation(annotation, username, this.state.userName);
 		}

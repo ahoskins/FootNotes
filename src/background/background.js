@@ -5,7 +5,7 @@ chrome.commands.onCommand.addListener(function(command) {
 		.then(function(info) { // must keep 'info' in closure, don't think there's a more elegant way?
 			queryTabs()
 			.then(function(tabs) {
-				chrome.tabs.sendMessage(tabs[0].id, {userName: info.email});
+				chrome.tabs.sendMessage(tabs[0].id, {userName: info.email.slice(0, info.email.indexOf('@'))});
 			})
 		})
 	}
@@ -37,7 +37,7 @@ chrome.identity.onSignInChanged(function(account, signedIn) {
 		.then(function(info) {
 			queryTabs()
 			.then(function(tabs) {
-				chrome.tabs.sendMessage(tabs[0].id, {userName: info.email});
+				chrome.tabs.sendMessage(tabs[0].id, {userName: info.email.slice(0, info.email.indexOf('@')});
 			})
 		})
 	}
