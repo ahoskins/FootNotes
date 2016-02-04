@@ -2,7 +2,7 @@
 given a string, generate a determinate aesthetically pleasing pastel color
 */
 function makePastelColor(username) {
-  let hash = _hashCode(username.slice(0, username.indexOf('@')));
+  let hash = _hashCode(username);
 
   // slice the hash into color components
   let red = hash.toString().slice(0, 3) % 255;
