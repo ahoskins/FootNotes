@@ -160,6 +160,9 @@ export default class Root extends React.Component {
 	Saves an annotation from user
 	*/
 	save(content) {
+		if (content === '') {
+			return;
+		}
 		this.saveAnnotation(content, this.state.currentTime, window.location.href, this.state.userName);
 	}
 
