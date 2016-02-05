@@ -22,10 +22,6 @@ const styles = {
 	}
 };
 
-/*
-- add author of each annotatation
-*/
-
 // make it global so the events don't go out of lexical scope
 let socket = null;
 
@@ -47,12 +43,37 @@ export default class Root extends React.Component {
 	componentDidMount() {
 		this.mirrorStorageToState();
 
-		// listen for background page to tell who the user is.
-		// then get new results from DB
-		// also handles listening for a change of account
+		// triggered when username is received from background
 		chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 				this.setState({userName: request.userName});
-				this.initForUser();
+
+				// poll DB for new results
+				getMatchingAnnotations(this.state.userName)
+				.then((annotations) => {
+					// will not be added if already exists
+					this.saveAnnotationArray(annotations);
+
+					// always delete
+					for (let a of annotations) {
+						deleteAnnotationById(a._id);
+					}
+				});
+
+				// socket-io connect and tell server its username to watch
+				socket = io.connect("https://youtube-annotate-backend.herokuapp.com/");
+				socket.on('message', (mes) => {
+					socket.emit('my_name', this.state.userName);
+				});
+
+				// triggered when new entry for username put into DB (by a different user)
+				// each new record will get added once here
+				socket.on('new_record', (annotation) => {
+					console.log('new record from socket');
+					let annotations = [annotation];
+					console.dir(annotation);
+					// will not be added if already exists
+					this.saveAnnotationArray(annotations);
+				});
 		  });
 
 		injectYoutubePoller();
@@ -68,56 +89,6 @@ export default class Root extends React.Component {
 				totalTime: e.detail.total,
 				url: e.detail.location
 			});
-		});
-	}
-
-	/*
-	can be called once the username is gotten from the background page
-	(the current chrome signed in user)
-	*/
-	initForUser() {
-		let removeDups = (array) => {
-			let exists = (input, arr) => {
-				for (let entry of arr) {
-					if (entry.time === input.time) {
-						return true;
-					}
-				}
-				return false;
-			}
-
-			let res = []
-			for (let entry of array) {
-				if (exists(entry, res)) {
-					continue;
-				}
-				res.push(entry);
-			}
-			return res;
-		}
-
-		let saveNewAnnotations = (response) => {
-			response = removeDups(response);
-			for (let annotation of response) {
-				this.saveAnnotationFromServer(annotation);
-				deleteAnnotationById(annotation._id);
-			}
-		}
-		// poll DB for new results
-		getMatchingAnnotations(this.state.userName)
-		.then(saveNewAnnotations);
-
-		// socket-io connect and tell server its username to watch
-		socket = io.connect("https://youtube-annotate-backend.herokuapp.com/");
-		socket.on('message', (mes) => {
-			socket.emit('my_name', this.state.userName);
-		});
-
-		// triggered when new entry for username put into DB (by a different user)
-		// each new record will get added once here
-		socket.on('new_record', (annotation) => {
-			console.log('new record from socket');
-			this.saveAnnotationFromServer(annotation);
 		});
 	}
 
@@ -143,40 +114,33 @@ export default class Root extends React.Component {
 	check if already exits (timestamps identical).
 	update state after.
 	*/
-	saveAnnotation(content, time, url, author) {
+	saveAnnotationArray(annotations) {
 		chrome.storage.sync.get('youtubeAnnotations', (obj) => {
 			if (Object.keys(obj).length === 0) obj['youtubeAnnotations'] = {};
 			obj = obj['youtubeAnnotations'];
 
-			// each annotation has a target URL, check if it already exists in localstorage
-			let urlAnnotations = obj[url] || [];
-			for (let existing of urlAnnotations) {
-				// timestamp is the unique ID (it's a couple digits, very unique)
-				if (existing.time === time) {
-					return;
+			for (let annotation of annotations) {
+				let urlAnnotations = obj[annotation.url] || [];
+				let exists = false;
+				for (let existing of urlAnnotations) {
+					if (existing.time === Number(annotation.time)) {
+						exists = true;
+					}
+				}
+				if (! exists) {
+					urlAnnotations.push({
+						'content': annotation.content,
+						'time': Number(annotation.time),
+						'author': annotation.author
+					});
+					obj[annotation.url] = urlAnnotations;
 				}
 			}
 
-			// annotation doesn't exist yet, add it to localstorage
-			urlAnnotations.push({
-				'content': content,
-				'time': time,
-				'author': author
-			});
-			obj[url] = urlAnnotations;
-
 			chrome.storage.sync.set({'youtubeAnnotations': obj}, () => {
 				this.mirrorStorageToState();
-			})
+			});
 		})
-	}
-
-	/*
-	save an annotation from server
-	*/
-	saveAnnotationFromServer(annotation) {
-		// convert to number first
-		this.saveAnnotation(annotation.content, Number(annotation.time), annotation.url, annotation.author);
 	}
 
 	/*
@@ -186,7 +150,13 @@ export default class Root extends React.Component {
 		if (content === '') {
 			return;
 		}
-		this.saveAnnotation(content, this.state.currentTime, window.location.href, this.state.userName);
+		let annotation = [{
+			'content': content,
+			'time': this.state.currentTime,
+			'author': this.state.userName,
+			'url': window.location.href
+		}];
+		this.saveAnnotationArray(annotation);
 	}
 
 	/*
