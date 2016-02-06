@@ -3,8 +3,12 @@ var webpack = require('webpack');
 
 module.exports = {
   devtool: 'source-map',
-  entry: './src/content-scripts/controller.jsx',
-  output: { path: 'build/', filename: 'bundle.js' },
+  // entry: './src/content-scripts/controller.jsx',
+  entry: {
+    client: './src/content-scripts/controller.jsx',
+    background: './src/background/background.js'
+  },
+  output: { path: 'build/', filename: 'bundle.[name].js' },
   module: {
     loaders: [
       {

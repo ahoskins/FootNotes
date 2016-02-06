@@ -19,8 +19,6 @@ function deleteAnnotationById(id) {
 /*
 create annotation on server for specified user
 */
-// TODO: only create if doesn't already exist is an option
-// right now it's being band-aid fixed by removing dups on the client
 function shareAnnotation(annotation, username) {
   let xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function() {

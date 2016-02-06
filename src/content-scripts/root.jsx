@@ -4,7 +4,7 @@ import Playbar from './components/playbar.jsx';
 import Share from './components/share.jsx';
 import io from 'socket.io-client';
 
-import {deleteAnnotationById, shareAnnotation, getMatchingAnnotations} from './network.js';
+import {deleteAnnotationById, shareAnnotation, getMatchingAnnotations} from './backend.js';
 import {injectYoutubePoller, injectSeekToTime} from './injecting.js';
 
 const styles = {
