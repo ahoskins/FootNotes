@@ -9,7 +9,7 @@ import {injectYoutubePoller, injectSeekToTime} from './injecting.js';
 
 const styles = {
 	outer: {
-		height: '80px',
+		height: '100px',
 		width: '100%',
 		backgroundColor: '#fefefe',
 		border: '1px solid #222222',
@@ -19,6 +19,15 @@ const styles = {
 		float: 'right',
 		marginRight: '10px',
 		fontSize: '0.8em'
+	},
+	main: {
+		width: '80%',
+		float: 'left'
+	},
+	share: {
+		width: '20%',
+		display: 'inline-block',
+		height: '100%'
 	}
 };
 
@@ -33,14 +42,13 @@ export default class Root extends React.Component {
 			totalTime: null,
 			annotations: [],
 			userName: '',
-			url: ''
+			url: '',
+			shared: []
 		}
 	}
 
-	/*
-	Inject interval code into youtube.com, listen for currentTime and totalTime
-	*/
 	componentDidMount() {
+		// chrome.storage.sync.clear();
 		this.mirrorStorageToState();
 
 		// triggered when username is received from background
@@ -68,9 +76,7 @@ export default class Root extends React.Component {
 				// triggered when new entry for username put into DB (by a different user)
 				// each new record will get added once here
 				socket.on('new_record', (annotation) => {
-					console.log('new record from socket');
 					let annotations = [annotation];
-					console.dir(annotation);
 					// will not be added if already exists
 					this.saveAnnotationArray(annotations);
 				});
@@ -93,7 +99,7 @@ export default class Root extends React.Component {
 	}
 
 	/*
-	Set component state based on annotations at current url
+	Set component state based on annotations and shared users at current url
 	*/
 	mirrorStorageToState() {
 		chrome.storage.sync.get('youtubeAnnotations', (obj) => {
@@ -106,11 +112,17 @@ export default class Root extends React.Component {
 			} else {
 				this.setState({annotations: []});
 			}
+
+			if (obj['shared'] === undefined || obj['shared'][window.location.href] === undefined) {
+				this.setState({shared: []});
+			} else {
+				this.setState({shared: obj['shared'][window.location.href]});
+			}
 		});
 	}
 
 	/*
-	generic annotation server (from user or server).
+	generic annotation saver (from user or server).
 	check if already exits (timestamps identical).
 	update state after.
 	*/
@@ -144,7 +156,8 @@ export default class Root extends React.Component {
 	}
 
 	/*
-	Saves an annotation from user
+	saves an annotation from user.
+	share with all people we are sharing with
 	*/
 	save(content) {
 		if (content === '') {
@@ -157,19 +170,52 @@ export default class Root extends React.Component {
 			'url': window.location.href
 		}];
 		this.saveAnnotationArray(annotation);
+
+		// update the people sharing with
+		for (let person of this.state.shared) {
+			shareAnnotation({
+				'content': content,
+				'time': this.state.currentTime,
+				'author': this.state.userName
+			}, person);
+		}
 	}
 
 	/*
-	share each annotation on the current URL with the chosen user
+	share each annotation on the current URL with the chosen user.
+	save to localstorage so it persists.
 	*/
 	share(username) {
-		// remove @gmail.com if they put it
+		if (this.state.shared.indexOf(username) > -1) {
+			return;
+		}
+
 		if (username.indexOf('@') > -1) {
 			username = username.slice(0, username.indexOf('@'));
 		}
+
+		this.state.shared.push(username);
+		this.setState({shared: this.state.shared});
+
+		// share existing anootations written by current user
 		for (let annotation of this.state.annotations) {
-			shareAnnotation(annotation, username);
+			if (annotation.author === this.state.userName) {
+				shareAnnotation(annotation, username);
+			}
 		}
+
+		// add shared person to localstorage
+		chrome.storage.sync.get('youtubeAnnotations', (obj) => {
+			if (Object.keys(obj).length === 0) obj['youtubeAnnotations'] = {};
+			obj = obj['youtubeAnnotations'];
+
+			let url = window.location.href;
+			obj['shared'] = obj['shared'] || {};
+			obj['shared'][url] = obj['shared'][url] || [];
+			obj['shared'][url].push(username);
+
+			chrome.storage.sync.set({'youtubeAnnotations': obj});
+		})
 	}
 
 	/*
@@ -179,17 +225,24 @@ export default class Root extends React.Component {
 		injectSeekToTime(time);
 	}
 
+
 	render() {
 		return (
 			<div style={styles.outer}>
-					<Annotater save={this.save.bind(this)} />
-					<span style={styles.right}>User: <b>{this.state.userName}</b></span>
-					<Share share={this.share.bind(this)} />
-					<Playbar
-						currentTime={this.state.currentTime}
-						totalTime={this.state.totalTime}
-						annotations={this.state.annotations}
-						seekTo={this.seekTo} />
+					<div style={styles.main}>
+						<Annotater save={this.save.bind(this)} />
+						<Playbar
+							currentTime={this.state.currentTime}
+							totalTime={this.state.totalTime}
+							annotations={this.state.annotations}
+							seekTo={this.seekTo} />
+					</div>
+					<div style={styles.share}>
+						<Share
+							share={this.share.bind(this)}
+							username={this.state.userName}
+							shared={this.state.shared} />
+					</div>
 			</div>
 		)
 	}

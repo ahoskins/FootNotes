@@ -9,15 +9,23 @@ const styles = {
 		padding: '2px',
     backgroundColor: '#f5b83f'
 	},
+	outer: {
+		backgroundColor: '#d3d3d3',
+		height: '100%',
+		borderRadius: '4px'
+	},
 	input: {
 		margin: '2px'
 	},
-  right: {
-    float: 'right',
-    marginRight: '10px'
-  }
+	center: {
+		textAlign: 'center'
+	},
+	sharedList: {
+		marginLeft: '10px'
+	}
 }
 
+// do something with username
 export default class Share extends React.Component {
   constructor(props) {
 		super(props);
@@ -32,10 +40,28 @@ export default class Share extends React.Component {
 
 	render() {
 		return (
-			<span style={styles.right}>
-        <input style={styles.input} onChange={this.updateState.bind(this)} placeholder="any google account" />
-				<button style={styles.button} onClick={this.props.share.bind(this, this.state.inputValue)}>Share</button>
-			</span>
+			<div style={styles.outer}>
+				<div style={styles.center}>
+					{this.props.username}
+					<input style={styles.input} onChange={this.updateState.bind(this)} placeholder="any google account" />
+					<button style={styles.button} onClick={this.props.share.bind(this, this.state.inputValue)}>Share</button>
+				</div>
+
+				<div style={styles.sharedList}>
+					<div style={styles.heading}>
+						Currently sharing with:
+					</div>
+					<ul>
+						{this.props.shared.map((user) => {
+							return (
+								<li key={user}>
+									{user}
+								</li>
+							)
+						})}
+					</ul>
+				</div>
+			</div>
 		)
 	}
 }

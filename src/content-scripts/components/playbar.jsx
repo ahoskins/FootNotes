@@ -2,9 +2,6 @@ import React from 'react';
 import {makePastelColor} from '../colorhash.js';
 
 const styles = {
-  outer: {
-    width: '100%'
-  },
   played: {
     display: 'inline-block',
     backgroundColor: 'red',
@@ -146,7 +143,8 @@ export default class Playbar extends React.Component {
       // shownAnnotation may or may not be null, depends if one should be shown
       // create the ticks and if any of them === shownAnnotation, then show it!
       ticks = this.props.annotations.map((annotation) => {
-        let portion = (annotation.time / this.props.totalTime) * 100;
+        // 80% of total vw, so multiply by 80
+        let portion = (annotation.time / this.props.totalTime) * 80;
 
         let d = {display: 'none'};
         // are you the chosen one?
@@ -198,7 +196,7 @@ export default class Playbar extends React.Component {
     }
 
     return (
-      <div style={styles.outer}>
+      <div>
         <div
           style={m(styles.played, {width: playedPercent + '%' })}
           onClick={this.playbarClickPlayed.bind(this, playedPercent)}>
