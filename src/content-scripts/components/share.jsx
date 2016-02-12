@@ -9,6 +9,14 @@ const styles = {
 		padding: '2px',
     backgroundColor: '#f5b83f'
 	},
+	buttonClose: {
+		border: '1px solid black',
+		margin: '2px',
+		borderRadius: '2px',
+		cursor: 'pointer',
+		padding: '2px',
+		backgroundColor: 'grey'
+	},
 	outer: {
 		backgroundColor: '#d3d3d3',
 		height: '100%',
@@ -45,6 +53,7 @@ export default class Share extends React.Component {
 					{this.props.username}
 					<input style={styles.input} onChange={this.updateState.bind(this)} placeholder="any google account" />
 					<button style={styles.button} onClick={this.props.share.bind(this, this.state.inputValue)}>Share</button>
+					<button style={styles.buttonClose} onClick={this.props.destroySelf.bind(this)}>x</button>
 				</div>
 
 				<div style={styles.sharedList}>

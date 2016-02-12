@@ -3,6 +3,7 @@ import Annotater from './components/annotater.jsx';
 import Playbar from './components/playbar.jsx';
 import Share from './components/share.jsx';
 import io from 'socket.io-client';
+import ReactDOM from 'react-dom';
 
 import {deleteAnnotationById, shareAnnotation, getMatchingAnnotations} from './backend.js';
 import {injectYoutubePoller, injectSeekToTime} from './injecting.js';
@@ -15,11 +16,6 @@ const styles = {
 		border: '1px solid #222222',
 		padding: '3px'
 	},
-	right: {
-		float: 'right',
-		marginRight: '10px',
-		fontSize: '0.8em'
-	},
 	main: {
 		width: '80%',
 		float: 'left'
@@ -31,8 +27,20 @@ const styles = {
 	}
 };
 
+function receiveEventsFromYoutube(e) {
+	if (e.detail.location !== this.state.url) {
+		this.mirrorStorageToState();
+	}
+	this.setState({
+		currentTime: e.detail.current,
+		totalTime: e.detail.total,
+		url: e.detail.location
+	});
+}
+
 // make it global so the events don't go out of lexical scope
 let socket = null;
+let receiver = null;
 
 export default class Root extends React.Component {
 	constructor(props) {
@@ -86,16 +94,9 @@ export default class Root extends React.Component {
 
 		this.setState({url: window.location.href});
 
-		document.addEventListener('youtube', (e) => {
-			if (e.detail.location !== this.state.url) {
-				this.mirrorStorageToState();
-			}
-			this.setState({
-				currentTime: e.detail.current,
-				totalTime: e.detail.total,
-				url: e.detail.location
-			});
-		});
+		receiver = receiveEventsFromYoutube.bind(this);
+		document.addEventListener('youtube', receiver);
+
 	}
 
 	/*
@@ -225,6 +226,13 @@ export default class Root extends React.Component {
 		injectSeekToTime(time);
 	}
 
+	/*
+	unmount self (the root component)
+	*/
+	destroySelf() {
+		document.removeEventListener('youtube', receiver);
+		ReactDOM.unmountComponentAtNode(document.getElementById('footnotes-extension-container'));
+	}
 
 	render() {
 		return (
@@ -241,7 +249,8 @@ export default class Root extends React.Component {
 						<Share
 							share={this.share.bind(this)}
 							username={this.state.userName}
-							shared={this.state.shared} />
+							shared={this.state.shared}
+							destroySelf={this.destroySelf.bind(this)} />
 					</div>
 			</div>
 		)
