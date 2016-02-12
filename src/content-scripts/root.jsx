@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 import ReactDOM from 'react-dom';
 
 import {deleteAnnotationById, shareAnnotation, getMatchingAnnotations} from './backend.js';
-import {injectYoutubePoller, injectSeekToTime} from './injecting.js';
+import {injectYoutubePoller, injectSeekToTime, removeInjectedYoutubePoller} from './injecting.js';
 
 const styles = {
 	outer: {
@@ -230,8 +230,14 @@ export default class Root extends React.Component {
 	unmount self (the root component)
 	*/
 	destroySelf() {
+		// remove 1 second video interval
 		document.removeEventListener('youtube', receiver);
-		ReactDOM.unmountComponentAtNode(document.getElementById('footnotes-extension-container'));
+		removeInjectedYoutubePoller();
+
+		// unmount self and remove container from DOM
+		let container = document.getElementById('footnotes-extension-container');
+		ReactDOM.unmountComponentAtNode(container);
+		container.parentNode.removeChild(container);
 	}
 
 	render() {

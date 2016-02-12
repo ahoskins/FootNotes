@@ -1,6 +1,6 @@
 function injectYoutubePoller() {
   const injectedCode = '(' + function() {
-    setInterval(function() {
+      youtubeFootNotesInterval = setInterval(function() {
       const current = document.getElementById('movie_player').getCurrentTime();
       const total = document.getElementById('movie_player').getDuration();
       const customEvent = new CustomEvent('youtube', {'detail': {'current': current, 'total': total, 'location': window.location.href}});
@@ -8,6 +8,15 @@ function injectYoutubePoller() {
     }, 1000);
 
   } + ')();';
+
+  const script = document.createElement('script');
+  script.textContent = injectedCode;
+  (document.head || document.documentElement).appendChild(script);
+  script.parentNode.removeChild(script);
+}
+
+function removeInjectedYoutubePoller() {
+  const injectedCode = '(function() {window.clearInterval(youtubeFootNotesInterval);})();';
 
   const script = document.createElement('script');
   script.textContent = injectedCode;
@@ -26,4 +35,4 @@ function injectSeekToTime(time) {
   script.parentNode.removeChild(script);
 }
 
-export {injectYoutubePoller, injectSeekToTime};
+export {injectYoutubePoller, injectSeekToTime, removeInjectedYoutubePoller};
