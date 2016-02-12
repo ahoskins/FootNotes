@@ -1,23 +1,32 @@
 chrome.commands.onCommand.addListener(function(command) {
-	if (command === 'activate') {
-		executeScript()
-		.then(getProfileUserInfo)
-		.then(function(info) { // keep info in the closure
-			getToken()
-			.then(getContacts)
-			.then(function(contacts) { // keep contacts in the closure
-				let processedContacts = processContacts(contacts);
-				queryTabs()
-				.then(function(tabs) {
-					chrome.tabs.sendMessage(tabs[0].id, {
-						'userName': info.email.slice(0, info.email.indexOf('@')),
-						'contacts': processedContacts
-					});
-				})
+	queryTabs()
+	.then(function(tabs) {
+		if (tabs[0].url.indexOf('www.youtube.com/watch?') > -1 && command === 'activate') {
+			showExtension();
+		} else {
+			alert('Must be watching a video on www.youtube.com to activate FootNotes.');
+		}
+	})
+});
+
+function showExtension() {
+	executeScript()
+	.then(getProfileUserInfo)
+	.then(function(info) { // keep info in the closure
+		getToken()
+		.then(getContacts)
+		.then(function(contacts) { // keep contacts in the closure
+			let processedContacts = processContacts(contacts);
+			queryTabs()
+			.then(function(tabs) {
+				chrome.tabs.sendMessage(tabs[0].id, {
+					'userName': info.email.slice(0, info.email.indexOf('@')),
+					'contacts': processedContacts
+				});
 			})
 		})
-	}
-});
+	})
+}
 
 function executeScript() {
 	return new Promise(function(resolve, reject) {
