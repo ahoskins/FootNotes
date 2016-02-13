@@ -25,17 +25,26 @@ const styles = {
 		display: 'inline-block',
 		height: '100%',
 		margin: '0px 3px'
+	},
+	hide: {
+		display: 'none'
 	}
 };
 
 function receiveEventsFromYoutube(e) {
+	// hide self, navigated off youtube page
+	if (e.detail.location.indexOf('www.youtube.com/watch?') === -1) {
+		this.hideSelf();
+		return;
+	}
 	if (e.detail.location !== this.state.url) {
 		this.mirrorStorageToState();
 	}
 	this.setState({
 		currentTime: e.detail.current,
 		totalTime: e.detail.total,
-		url: e.detail.location
+		url: e.detail.location,
+		hide: false
 	});
 }
 
@@ -52,7 +61,8 @@ export default class Root extends React.Component {
 			annotations: [],
 			userName: '',
 			url: '',
-			shared: []
+			shared: [],
+			hide: false
 		}
 	}
 
@@ -230,20 +240,13 @@ export default class Root extends React.Component {
 	/*
 	unmount self (the root component)
 	*/
-	destroySelf() {
-		// remove 1 second video interval
-		document.removeEventListener('youtube', receiver);
-		removeInjectedYoutubePoller();
-
-		// unmount self and remove container from DOM
-		let container = document.getElementById('footnotes-extension-container');
-		ReactDOM.unmountComponentAtNode(container);
-		container.parentNode.removeChild(container);
+	hideSelf() {
+		this.setState({hide: true});
 	}
 
 	render() {
 		return (
-			<div style={styles.outer}>
+			<div style={this.state.hide ? styles.hide : styles.outer}>
 					<div style={styles.main}>
 						<Annotater save={this.save.bind(this)} />
 						<Playbar
@@ -257,7 +260,7 @@ export default class Root extends React.Component {
 							share={this.share.bind(this)}
 							username={this.state.userName}
 							shared={this.state.shared}
-							destroySelf={this.destroySelf.bind(this)} />
+							hideSelf={this.hideSelf.bind(this)} />
 					</div>
 			</div>
 		)

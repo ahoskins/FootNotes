@@ -56,7 +56,7 @@ export default class Share extends React.Component {
 			<div style={styles.outer}>
 				<input style={styles.input} onChange={this.updateState.bind(this)} placeholder="any google account" />
 				<button style={styles.button} onClick={this.props.share.bind(this, this.state.inputValue)}>Share</button>
-				<button style={styles.buttonClose} onClick={this.props.destroySelf.bind(this)}>Close</button>
+				<button style={styles.buttonClose} onClick={this.props.hideSelf.bind(this)}>Close</button>
 
 				<div style={styles.sharedList}>
 					<div style={styles.heading}>
