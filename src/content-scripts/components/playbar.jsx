@@ -144,7 +144,7 @@ export default class Playbar extends React.Component {
       // create the ticks and if any of them === shownAnnotation, then show it!
       ticks = this.props.annotations.map((annotation) => {
         // 80% of total vw, so multiply by 80
-        let portion = (annotation.time / this.props.totalTime) * 80;
+        let portion = (annotation.time / this.props.totalTime) * 75;
 
         let d = {display: 'none'};
         // are you the chosen one?

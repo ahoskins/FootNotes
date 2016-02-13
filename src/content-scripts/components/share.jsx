@@ -15,21 +15,26 @@ const styles = {
 		borderRadius: '2px',
 		cursor: 'pointer',
 		padding: '2px',
-		backgroundColor: 'grey'
+		backgroundColor: 'grey',
+		float: 'right'
 	},
 	outer: {
-		backgroundColor: '#d3d3d3',
-		height: '100%',
-		borderRadius: '4px'
+		borderLeft: '1px solid black',
+		height: '100%'
 	},
 	input: {
 		margin: '2px'
 	},
-	center: {
-		textAlign: 'center'
-	},
 	sharedList: {
 		marginLeft: '10px'
+	},
+	heading: {
+		fontWeight: 'bold',
+		textAlign: 'center'
+	},
+	scroll: {
+		overflow: 'scroll',
+		height: '60px'
 	}
 }
 
@@ -49,18 +54,15 @@ export default class Share extends React.Component {
 	render() {
 		return (
 			<div style={styles.outer}>
-				<div style={styles.center}>
-					{this.props.username}
-					<input style={styles.input} onChange={this.updateState.bind(this)} placeholder="any google account" />
-					<button style={styles.button} onClick={this.props.share.bind(this, this.state.inputValue)}>Share</button>
-					<button style={styles.buttonClose} onClick={this.props.destroySelf.bind(this)}>x</button>
-				</div>
+				<input style={styles.input} onChange={this.updateState.bind(this)} placeholder="any google account" />
+				<button style={styles.button} onClick={this.props.share.bind(this, this.state.inputValue)}>Share</button>
+				<button style={styles.buttonClose} onClick={this.props.destroySelf.bind(this)}>Close</button>
 
 				<div style={styles.sharedList}>
 					<div style={styles.heading}>
-						Currently sharing with:
+						Sharing With:
 					</div>
-					<ul>
+					<ul style={styles.scroll}>
 						{this.props.shared.map((user) => {
 							return (
 								<li key={user}>

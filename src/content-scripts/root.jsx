@@ -17,13 +17,14 @@ const styles = {
 		padding: '3px'
 	},
 	main: {
-		width: '80%',
+		width: '75%',
 		float: 'left'
 	},
 	share: {
-		width: '20%',
+		width: '23%',
 		display: 'inline-block',
-		height: '100%'
+		height: '100%',
+		margin: '0px 3px'
 	}
 };
 
