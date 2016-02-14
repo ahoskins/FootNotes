@@ -2,7 +2,9 @@
 
 **[soundcloud-style](https://soundcloud.com/kanyewest/nomorepartiesinla) time-tied comments for youtube**
 
-Comment on videos for personal records, or share in realtime with friends.  FootNotes is a chrome extension that was made during UAlberta's [HackED 2016](http://eceweek.compeclub.com/hackathon/).  FootNotes is **not secure**, it is just a proof of concept for functionality that I would find useful in Youtube. 
+Comment on videos for personal records, or share in realtime with friends.  FootNotes is a chrome extension that was made during UAlberta's [HackED 2016](http://eceweek.compeclub.com/hackathon/).  
+
+FootNotes' backend (closed source) is **not secure**.  In the future, I might spend time making it secure.  But for now, this project is merely a proof of concept for functionality I would find useful in Youtube. 
 
 Demo
 ---
@@ -34,7 +36,7 @@ How it Works
 ------
 Comments are stored in [chrome.storage.sync](https://developer.chrome.com/extensions/storage), a special partition of localstorage for the chrome user account.  This means that by signing into your chrome account on any machine the FootNotes time-tied comments will be there.  
 
-Instead of using peer-to-peer (like WebRTC), sharing is done with a [small backend](https://github.com/ahoskins/FootNotes-back) that uses [socket.io](http://socket.io/).  This means sharing is realtime when both users are online, but also works when only one is online because the backend buffers the shared comments in MongoDB.  Once comments are transferred to the receiver, they are deleted from the database.
+Instead of using peer-to-peer (like WebRTC), sharing is done with a small backend (closed source) that uses [socket.io](http://socket.io/).  This means sharing is realtime when both users are online, but also works when only one is online because the backend buffers the shared comments in MongoDB.  Once comments are transferred to the receiver, they are deleted from the database.
 
 Extensions (just like the developer console) have full access to a webpage's DOM, but not the running JavaScript.  To get the youtube video's current playtime, FootNotes injects code into youtube.com.  Injected code has the same privilages as code that was there from the beginning, so this injected code is FootNotes' inside agent for things like current playtime and total video length.
 
