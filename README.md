@@ -19,10 +19,15 @@ Install
 
 From source (for development):
 
-1. in chrome, navigate to chrome://extensions
-2. make sure developer mode is checked (top-right of chrome://extensions)
-3. load unpacked extension -> select the root of this cloned repo in your filesystem -> now FootNotes is installed
-4. set the hotkey (bottom-right of chrome://extensions)
+Clone, install deps, and build:
+    $ git clone https://github.com/ahoskins/FootNotes.git && cd FootNotes
+    $ npm install
+    $ webpack -d --progress --watch
+
+Load into chrome:
+
+1. in chrome://extensions select "load unpacked extension" (make sure developer mode is checked)
+2. set the hotkey (bottom of chrome://extensions)
 
 How it Works
 ------
