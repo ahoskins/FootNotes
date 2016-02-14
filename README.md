@@ -13,10 +13,13 @@ After installing, setup the hotkey in chrome://extension.  When watching a youtu
 
 Install
 -----
+[Chrome webstore](https://chrome.google.com/webstore/detail/footnotes/nckdagfbgjenfpmjcdcnmaonehfkkjoh/related)
 
-For now, install from source.  Eventually it might make its way into the chrome webstore. 
+**OR**
 
-1. in chrome, navigate to [chrome://extensions]
+From source (for development):
+
+1. in chrome, navigate to chrome://extensions
 2. make sure developer mode is checked (top-right of chrome://extensions)
 3. load unpacked extension -> select the root of this cloned repo in your filesystem -> now FootNotes is installed
 4. set the hotkey (bottom-right of chrome://extensions)
