@@ -6,7 +6,7 @@
   "version": "0.1",
 
   "background": {
-    "scripts": ["build/bundle.background.js"],
+   "scripts": ["src/background/background.js"],
     "persistent": false
   },
 
