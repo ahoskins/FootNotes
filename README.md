@@ -2,7 +2,7 @@
 
 **[soundcloud-style](https://soundcloud.com/kanyewest/nomorepartiesinla) time-tied comments for youtube**
 
-Comment on vidoes for personal records, or share in realtime with friends.  FootNotes is a chrome extension that was made during UAlberta's [HackED 2016](http://eceweek.compeclub.com/hackathon/).  FootNotes is **not secure**, it is just a proof of concept for functionality that I would find useful in Youtube. 
+Comment on videos for personal records, or share in realtime with friends.  FootNotes is a chrome extension that was made during UAlberta's [HackED 2016](http://eceweek.compeclub.com/hackathon/).  FootNotes is **not secure**, it is just a proof of concept for functionality that I would find useful in Youtube. 
 
 Demo
 ---
