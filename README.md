@@ -20,6 +20,7 @@ Install
 From source (for development):
 
 Clone, install deps, and build:
+
     $ git clone https://github.com/ahoskins/FootNotes.git && cd FootNotes
     $ npm install
     $ webpack -d --progress --watch
