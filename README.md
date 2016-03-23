@@ -4,7 +4,7 @@
 
 Comment on videos for personal records, or share in realtime with friends.  FootNotes is a chrome extension that was made during UAlberta's [HackED 2016](http://eceweek.compeclub.com/hackathon/).  
 
-FootNotes' backend (closed source) is **not secure**.  In the future, I might spend time making it secure.  But for now, this project is merely a proof of concept for functionality I would find useful in Youtube. 
+This project is currently under further development &mdash; ideas, praise, critique is appreciated.  Just open an issue.
 
 Demo
 ---
